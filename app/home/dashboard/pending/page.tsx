@@ -126,8 +126,8 @@ export default function PendingBookingPage() {
               <span>Filter by</span>
             </div>
           </div>
-        </div>
-      </header>
+        </div>    
+      </header> 
 
       <div className="border border-gray-100 rounded-lg overflow-visible shadow-sm">
         {isLoading ? (
