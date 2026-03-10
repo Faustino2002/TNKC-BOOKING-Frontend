@@ -63,7 +63,6 @@ export default function LoginPage() {
 
   const handleResetLink = () => {
     const emailTrimmed = email.trim();
-    
     if (emailTrimmed === "") {
       setEmailError(true);
       setEmailInvalid(false);
