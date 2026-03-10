@@ -5,7 +5,6 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-// Added 'Eye' to imports
 import { AlertCircle, EyeOff, Eye, Check } from "lucide-react";
 
 export default function LoginPage() {
@@ -17,8 +16,6 @@ export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
-  
-  // NEW: State for showing/hiding password
   const [showPassword, setShowPassword] = useState(false);
   
   // 3. Login Error & Lockout
@@ -30,7 +27,7 @@ export default function LoginPage() {
   const [emailError, setEmailError] = useState(false);
   const [emailInvalid, setEmailInvalid] = useState(false);
 
-  // Helper for your backend developer
+  // Helper for backend logging
   const logDataForBackend = (action: string) => {
     console.log("Submission Data:", {
       event: action,
@@ -87,10 +84,10 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen w-full flex-col lg:flex-row bg-white overflow-hidden font-sans relative">
       
-      {/* SUCCESS MODAL */}
+      {/* SUCCESS MODAL - Changed to 'fixed' for better overlay coverage */}
       {showSuccess && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-[24px] p-12 max-w-[620px] w-full text-center shadow-2xl">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-[24px] p-12 max-w-[620px] w-full text-center shadow-2xl animate-in fade-in zoom-in duration-300">
             <div className="flex justify-center mb-8">
               <div className="h-24 w-24 rounded-full border-[3px] border-[#22C55E] flex items-center justify-center">
                 <Check className="text-[#22C55E]" size={48} strokeWidth={2.5} />
@@ -98,7 +95,7 @@ export default function LoginPage() {
             </div>
             <h2 className="text-[34px] font-bold text-black mb-4 leading-tight">Reset Link Sent Successfully</h2>
             <p className="text-[#1a1a1a] text-[15px] leading-relaxed mb-10 px-4">
-              A reset password link has been sent to you via email. You can follow that link and create a new password. If the email does not arrive, contact your tech support
+              A reset password link has been sent to you via email. You can follow that link and create a new password.
             </p>
             <Button 
               onClick={() => {
@@ -117,6 +114,7 @@ export default function LoginPage() {
       {/* LEFT SIDE: FORM CONTENT */}
       <div className="relative flex flex-1 flex-col items-center justify-center px-6 py-12 lg:px-20 bg-white">
         
+        {/* Background Blobs */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
           <div className="absolute top-[-10%] right-[-10%] h-[800px] w-[800px] opacity-15 blur-[120px]">
             <Image src="/blu.png" alt="" fill className="object-contain" />
@@ -135,7 +133,7 @@ export default function LoginPage() {
               </div>
               <div className="flex flex-col">
                 <p className="text-[#D32F2F] text-[14px] font-bold leading-tight">Too many failed login attempts</p>
-                <p className="text-[#D32F2F] text-[12px] opacity-80 mt-0.5 font-medium">Unavailable due too many login attempts. Try again later.</p>
+                <p className="text-[#D32F2F] text-[12px] opacity-80 mt-0.5 font-medium">Unavailable due to many login attempts. Try again later.</p>
               </div>
             </div>
           )}
@@ -168,12 +166,11 @@ export default function LoginPage() {
                     {fieldErrors.username && <p className="text-[#E27C7C] text-[13px]">Username is required</p>}
                   </div>
 
-                  {/* Password with Toggle Visibility */}
+                  {/* Password Field with Unified Icon Logic */}
                   <div className="space-y-2">
                     <Label className="text-[#5B89B6] font-medium text-[16px]">Password</Label>
                     <div className="relative">
                       <Input
-                        // Toggle between 'password' and 'text' types
                         type={showPassword ? "text" : "password"}
                         disabled={isLockedOut}
                         value={password}
@@ -183,11 +180,11 @@ export default function LoginPage() {
                         }`}
                         placeholder="Password"
                       />
+                      {/* Fixed: Icons grouped in a single flex container to prevent overlap */}
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                        {fieldErrors.password && <AlertCircle className="text-[#E27C7C]" size={20} />}
-                        
-                        {/* Only show toggle button if there's no required-field error icon */}
-                        {!fieldErrors.password && (
+                        {fieldErrors.password ? (
+                          <AlertCircle className="text-[#E27C7C]" size={20} />
+                        ) : (
                           <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
@@ -207,7 +204,7 @@ export default function LoginPage() {
                   </div>
 
                   {loginError && !isLockedOut && (
-                    <div className="flex items-start gap-3 p-4 bg-[#FEECEC] border border-[#FAD2D2] rounded-xl">
+                    <div className="flex items-start gap-3 p-4 bg-[#FEECEC] border border-[#FAD2D2] rounded-xl animate-in fade-in duration-200">
                       <AlertCircle className="text-[#E27C7C] mt-0.5" size={20} />
                       <div>
                         <p className="text-[#D32F2F] text-[14px] font-bold">Invalid username or password</p>
@@ -226,7 +223,7 @@ export default function LoginPage() {
                 </div>
               </div>
             ) : (
-              /* FORGOT PASS VIEW */
+              /* forgotpassword*/
               <div className="w-full">
                 <h1 className="text-[44px] font-bold tracking-tight text-black text-center mb-3">Forgot Password</h1>
                 <p className="text-[14px] text-black text-center mb-10">Enter your registered email and we will send you a reset link</p>
@@ -277,7 +274,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* RIGHT SIDE PIC */}
+      
       <div className="hidden lg:block relative flex-1">
         <Image src="/LoginPic.jpg" alt="Modern Building" fill className="object-cover" priority />
       </div>

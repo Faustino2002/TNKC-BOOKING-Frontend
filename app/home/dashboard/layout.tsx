@@ -15,7 +15,6 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  // State for the Floor Catalog dropdown
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
 
   return (
@@ -39,7 +38,14 @@ export default function DashboardLayout({
           </p>
           
           <NavItem href="/home/dashboard" icon={<LayoutDashboard size={22} />} label="Dashboard" isActive={pathname === "/home/dashboard"} />
-          <NavItem href="/home/dashboard/crewlist" icon={<Users size={22} />} label="Crewlist" isActive={pathname === "/home/dashboard/crewlist"} />
+          
+          <NavItem 
+            href="/home/dashboard/guestlist" 
+            icon={<Users size={22} />} 
+            label="Guest List" 
+            isActive={pathname === "/home/dashboard/guestlist"} 
+          />
+          
           <NavItem href="/home/dashboard/pending" icon={<CalendarCheck size={22} />} label="Pending Booking" isActive={pathname === "/home/dashboard/pending"} />
 
           {/* DROPDOWN: Floor Catalog */}
@@ -58,13 +64,12 @@ export default function DashboardLayout({
               </div>
             </button>
 
-            {/* Sub-menu items (only visible if sidebar is expanded) */}
             <div className={`overflow-hidden transition-all duration-300 ease-in-out hidden group-hover:block ${
               isCatalogOpen ? "max-h-40 opacity-100 mt-1" : "max-h-0 opacity-0"
             }`}>
               <SubNavItem href="/home/dashboard/catalog/rooms" label="Room Catalog" isActive={pathname === "/home/dashboard/catalog/rooms"} />
-              <SubNavItem href="/home/dashboard/catalog/floor1" label="Room Catalog" isActive={pathname === "/home/dashboard/catalog/floor1"} />
-              <SubNavItem href="/home/dashboard/catalog/floor2" label="Room Catalog" isActive={pathname === "/home/dashboard/catalog/floor2"} />
+              <SubNavItem href="/home/dashboard/catalog/floor1" label="1st Floor" isActive={pathname === "/home/dashboard/catalog/floor1"} />
+              <SubNavItem href="/home/dashboard/catalog/floor2" label="2nd Floor" isActive={pathname === "/home/dashboard/catalog/floor2"} />
             </div>
           </div>
 
@@ -73,7 +78,7 @@ export default function DashboardLayout({
             <span className="hidden group-hover:block">General</span>
           </p>
           
-          <NavItem href="/home/dashboard/settings" icon={<Settings size={22} />} label="Setting" isActive={pathname === "/home/dashboard/settings"} />
+          <NavItem href="/home/dashboard/settings" icon={<Settings size={22} />} label="Settings" isActive={pathname === "/home/dashboard/settings"} />
           <NavItem href="/home/dashboard/support" icon={<LifeBuoy size={22} />} label="Support" isActive={pathname === "/home/dashboard/support"} />
         </nav>
 
@@ -94,18 +99,7 @@ export default function DashboardLayout({
   );
 }
 
-// Sub-navigation item component
-function SubNavItem({ href, label, isActive }: { href: string, label: string, isActive: boolean }) {
-  return (
-    <Link href={href}>
-      <div className={`pl-14 py-2 text-sm font-medium transition-colors hover:text-[#3282B8] ${
-        isActive ? "text-[#3282B8]" : "text-gray-400"
-      }`}>
-        {label}
-      </div>
-    </Link>
-  );
-}
+// --- MISSING COMPONENTS ADDED BELOW ---
 
 function NavItem({ icon, label, isActive, href }: { icon: React.ReactNode, label: string, isActive: boolean, href: string }) {
   return (
@@ -116,6 +110,18 @@ function NavItem({ icon, label, isActive, href }: { icon: React.ReactNode, label
         <span className="ml-4 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap overflow-hidden">
           {label}
         </span>
+      </div>
+    </Link>
+  );
+}
+
+function SubNavItem({ href, label, isActive }: { href: string, label: string, isActive: boolean }) {
+  return (
+    <Link href={href}>
+      <div className={`pl-14 py-2 text-sm font-medium transition-colors hover:text-[#3282B8] ${
+        isActive ? "text-[#3282B8]" : "text-gray-400"
+      }`}>
+        {label}
       </div>
     </Link>
   );

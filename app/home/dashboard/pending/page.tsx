@@ -69,7 +69,7 @@ export default function PendingBookingPage() {
       
       console.log("Saved successfully!");
     } catch (error) {
-      // If backend fails, we still update the UI for your demo/testing
+      // If backend fail we still update the UI for your demo/testing
       setBookings((prev) =>
         prev.map((b) => (b.dbId === viewBooking.dbId ? { ...viewBooking } : b))
       );
