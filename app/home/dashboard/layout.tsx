@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, Users, CalendarCheck, BookOpen, 
-  Settings, LifeBuoy, ChevronDown, ChevronUp
+  Settings, LifeBuoy, ChevronDown, ChevronUp, ClipboardList
 } from "lucide-react";
 
 export default function DashboardLayout({
@@ -42,11 +42,17 @@ export default function DashboardLayout({
           <NavItem 
             href="/home/dashboard/guestlist" 
             icon={<Users size={22} />} 
-            label="Guest List" 
-            isActive={pathname === "/home/dashboard/guestlist"} 
+            label="Guestlist" 
+            isActive={pathname.includes("/home/dashboard/guestlist")} 
           />
           
-          <NavItem href="/home/dashboard/pending" icon={<CalendarCheck size={22} />} label="Pending Booking" isActive={pathname === "/home/dashboard/pending"} />
+          {/* UPDATED PATH FROM /pending TO /bookinglist */}
+          <NavItem 
+            href="/home/dashboard/bookinglist" 
+            icon={<CalendarCheck size={22} />} 
+            label="Booking List" 
+            isActive={pathname.includes("/home/dashboard/bookinglist")} 
+          />
 
           {/* DROPDOWN: Floor Catalog */}
           <div className="relative">
@@ -84,9 +90,9 @@ export default function DashboardLayout({
 
         {/* Profile Section */}
         <div className="mt-auto p-4 border-t border-gray-50 flex items-center shrink-0">
-          <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold shrink-0">MG</div>
+          <div className="h-10 w-10 rounded-full bg-[#3498db] flex items-center justify-center text-white font-bold shrink-0 shadow-sm">KM</div>
           <div className="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-            <p className="text-sm font-bold text-black">Mellissa Grey</p>
+            <p className="text-sm font-bold text-black">Klare Marasigan</p>
             <p className="text-[11px] text-gray-400">Frontdesk</p>
           </div>
         </div>
@@ -99,13 +105,11 @@ export default function DashboardLayout({
   );
 }
 
-// --- MISSING COMPONENTS ADDED BELOW ---
-
 function NavItem({ icon, label, isActive, href }: { icon: React.ReactNode, label: string, isActive: boolean, href: string }) {
   return (
     <Link href={href}>
       <div className={`flex items-center rounded-lg cursor-pointer transition-all duration-200 h-12 px-3 
-        ${isActive ? "bg-[#3498db] text-white" : "text-gray-400 hover:bg-[#E7F0FF] hover:text-[#3282B8]"}`}>
+        ${isActive ? "bg-[#3498db] text-white shadow-md" : "text-gray-400 hover:bg-[#E7F0FF] hover:text-[#3282B8]"}`}>
         <div className="shrink-0 w-6 flex justify-center">{icon}</div>
         <span className="ml-4 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap overflow-hidden">
           {label}

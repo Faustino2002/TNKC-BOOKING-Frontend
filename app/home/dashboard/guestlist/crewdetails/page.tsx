@@ -8,9 +8,10 @@ import {
   Ship, 
   BookOpen, 
   History, 
-  Bed,
   ChevronDown,
-  Calendar
+  Calendar,
+  Clock,
+  Bed
 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -19,29 +20,29 @@ import { Label } from "@/components/ui/label";
 
 // --- MOCK DATA ---
 const MOCK_CURRENT_BOOKING = {
-  id: "TNCK-2026-03-999",
-  room: "Room B - 12",
-  duration: "5 nights",
-  checkIn: "2026-03-08",
-  checkOut: "2026-03-13",
-  status: "In-House"
+  id: "TNCK - 2026 - 05 -789",
+  date: "04/28/26",
+  roomNumber: "Cabin A - 04",
+  floor: "TNKC Floor 2",
+  roomType: "Single",
+  bedNumber: "Bed #1",
+  capacity: "1 person",
+  checkInDate: "06/01/26",
+  checkInTime: "9:00 AM",
+  checkOutDate: "06/01/26",
+  checkOutTime: "9:00 AM",
+  duration: "5 days and 4 nights",
+  status: "Confirmed",
+  source: "Self-Service Kiosk"
 };
 
 const MOCK_HISTORY = [
   {
-    id: "TNCK-2026-02-067",
+    id: "TNCK - 2026 - 02 - 067",
     room: "Room A - 01",
     duration: "4 nights",
     checkIn: "2026-01-23",
-    checkOut: "2026-01-27",
-    status: "Completed"
-  },
-  {
-    id: "TNCK-2025-11-102",
-    room: "Room C - 05",
-    duration: "2 nights",
-    checkIn: "2025-11-15",
-    checkOut: "2025-11-17",
+    checkOut: "2026-01-26",
     status: "Completed"
   }
 ];
@@ -127,46 +128,45 @@ function CrewDetailsContent() {
 
         {/* RIGHT CONTENT AREA */}
         <div className="flex-1 w-full">
-          {/* PROFILE VIEW - EXACTLY AS YOU HAD IT */}
           {activeTab === "profile" && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               <section className="p-8">
                 <div className="bg-[#3498db] text-white px-6 py-2.5 rounded-lg text-lg font-medium mb-6">Personal Information</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-1.5">
-                    <Label className="text-gray-400 text-xs font-semibold">Crew ID</Label>
+                    <Label className="text-gray-400 text-xs font-semibold uppercase">Crew ID</Label>
                     <Input disabled value={crewData.id} className="h-10 bg-gray-50/50 border-gray-200 text-gray-500" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-gray-400 text-xs font-semibold">Seaman ID</Label>
+                    <Label className="text-gray-400 text-xs font-semibold uppercase">Seaman ID</Label>
                     <Input defaultValue={crewData.seamanId} className="h-10 border-gray-200" />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
                   <div className="space-y-1.5">
-                    <Label className="text-gray-400 text-xs font-semibold">First Name</Label>
+                    <Label className="text-gray-400 text-xs font-semibold uppercase">First Name</Label>
                     <Input defaultValue={firstName} className="h-10 border-gray-200" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-gray-400 text-xs font-semibold">Middle Name</Label>
+                    <Label className="text-gray-400 text-xs font-semibold uppercase">Middle Name</Label>
                     <Input defaultValue={middleName} className="h-10 border-gray-200" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-gray-400 text-xs font-semibold">Last Name</Label>
+                    <Label className="text-gray-400 text-xs font-semibold uppercase">Last Name</Label>
                     <Input defaultValue={lastName} className="h-10 border-gray-200" />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
                   <div className="space-y-1.5">
-                    <Label className="text-gray-400 text-xs font-semibold">Rank</Label>
+                    <Label className="text-gray-400 text-xs font-semibold uppercase">Rank</Label>
                     <Input defaultValue={crewData.rank} className="h-10 border-gray-200" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-gray-400 text-xs font-semibold">Vessel</Label>
+                    <Label className="text-gray-400 text-xs font-semibold uppercase">Vessel</Label>
                     <Input defaultValue={crewData.vessel} className="h-10 border-gray-200" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-gray-400 text-xs font-semibold">Status</Label>
+                    <Label className="text-gray-400 text-xs font-semibold uppercase">Status</Label>
                     <Input defaultValue={crewData.status} className="h-10 border-gray-200" />
                   </div>
                 </div>
@@ -176,11 +176,11 @@ function CrewDetailsContent() {
                 <div className="bg-[#3498db] text-white px-6 py-2.5 rounded-lg text-lg font-medium mb-6">Contact Information</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-1.5">
-                    <Label className="text-gray-400 text-xs font-semibold">Contact Number</Label>
+                    <Label className="text-gray-400 text-xs font-semibold uppercase">Contact Number</Label>
                     <Input defaultValue="0987654321" className="h-10 border-gray-200" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-gray-400 text-xs font-semibold">Email</Label>
+                    <Label className="text-gray-400 text-xs font-semibold uppercase">Email</Label>
                     <Input defaultValue={crewData.email} className="h-10 border-gray-200" />
                   </div>
                 </div>
@@ -188,11 +188,13 @@ function CrewDetailsContent() {
 
               <section className="px-8 pb-8">
                 <div className="bg-[#3498db] text-white px-6 py-2.5 rounded-lg text-lg font-medium mb-6">Identification</div>
-                <div className="space-y-1.5 w-1/3">
-                  <Label className="text-gray-400 text-xs font-semibold">Government ID</Label>
+                <div className="space-y-1.5 w-full md:w-1/3">
+                  <Label className="text-gray-400 text-xs font-semibold uppercase">Government ID</Label>
                   <div className="relative">
                     <select className="w-full h-10 rounded-md border border-gray-200 px-3 bg-white text-gray-400 text-sm appearance-none outline-none">
                       <option>Select ID Type</option>
+                      <option>Passport</option>
+                      <option>Driver's License</option>
                     </select>
                     <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   </div>
@@ -204,7 +206,7 @@ function CrewDetailsContent() {
                   Cancel
                 </Button>
                 <Button className="px-10 bg-[#3498db] hover:bg-blue-600 text-white rounded-lg shadow-sm">
-                  Save
+                  Save Changes
                 </Button>
               </div>
             </div>
@@ -213,9 +215,9 @@ function CrewDetailsContent() {
           {/* CURRENT BOOKING VIEW */}
           {activeTab === "current" && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-               <div className="bg-[#D1E9FF] text-[#1e3a5f] px-8 py-5 text-xl font-bold">Current Booking Details</div>
+               <div className="bg-[#3498db] text-white px-8 py-5 text-xl font-bold">Current Booking Details</div>
                <div className="p-8">
-                  <BookingCard data={MOCK_CURRENT_BOOKING} isCurrent={true} />
+                  <BookingCard data={MOCK_CURRENT_BOOKING} />
                </div>
             </div>
           )}
@@ -223,10 +225,10 @@ function CrewDetailsContent() {
           {/* BOOKING HISTORY VIEW */}
           {activeTab === "history" && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-               <div className="bg-[#D1E9FF] text-[#1e3a5f] px-8 py-5 text-xl font-bold">Booking History</div>
+               <div className="bg-[#3498db] text-white px-8 py-5 text-xl font-bold">Booking History</div>
                <div className="p-8 space-y-6">
                   {MOCK_HISTORY.map((item, index) => (
-                    <BookingCard key={index} data={item} />
+                    <HistoryCard key={index} data={item} />
                   ))}
                </div>
             </div>
@@ -237,43 +239,112 @@ function CrewDetailsContent() {
   );
 }
 
-// Reusable Booking Card Component for Current/History tabs
-function BookingCard({ data, isCurrent = false }: any) {
+// History Card matching Image 4
+function HistoryCard({ data }: any) {
   return (
-    <div className="border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow bg-white">
-      <div className="flex justify-between items-start mb-6">
-        <div className="flex gap-4">
-          <div className={`p-4 rounded-xl ${isCurrent ? 'bg-blue-50' : 'bg-gray-50'}`}>
-            <Bed className={isCurrent ? 'text-[#3498db]' : 'text-gray-400'} size={28} />
+    <div className="border border-gray-100 rounded-2xl overflow-hidden shadow-sm bg-white">
+      <div className="flex justify-between items-center p-5 border-b border-gray-50">
+        <div className="flex items-center gap-4">
+          <div className="p-2 border border-blue-100 rounded-lg">
+            <Bed className="text-[#3498db]" size={20} />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-[#1e3a5f]">{data.id}</h3>
-            <p className="text-gray-400 font-semibold text-sm">{data.room} • {data.duration}</p>
+            <h3 className="text-[#1e3a5f] font-bold text-base">{data.id}</h3>
+            <p className="text-gray-400 text-[11px] font-medium uppercase">
+              {data.room} &nbsp;•&nbsp; {data.duration}
+            </p>
           </div>
         </div>
-        <span className={`text-white text-[10px] px-4 py-1.5 rounded-full font-bold uppercase ${isCurrent ? 'bg-[#3498db]' : 'bg-[#2ecc71]'}`}>
+        <span className="bg-[#2ecc71] text-white text-[10px] px-4 py-1.5 rounded-full font-bold uppercase">
           {data.status}
         </span>
       </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-8 pt-6 border-t border-gray-50">
+      <div className="grid grid-cols-3 p-5">
         <div>
-          <p className="text-[10px] text-gray-400 font-bold uppercase mb-1 flex items-center gap-1">
-            <Calendar size={12} /> Check-In Date
-          </p>
-          <p className="text-[#1e3a5f] font-bold">{data.checkIn}</p>
+          <p className="text-gray-400 text-[10px] font-bold uppercase mb-2 tracking-wider">Check-in Date</p>
+          <p className="text-[#1e3a5f] font-bold text-sm">{data.checkIn}</p>
         </div>
         <div>
-          <p className="text-[10px] text-gray-400 font-bold uppercase mb-1 flex items-center gap-1">
-            <Calendar size={12} /> Check-Out Date
-          </p>
-          <p className="text-[#1e3a5f] font-bold">{data.checkOut}</p>
+          <p className="text-gray-400 text-[10px] font-bold uppercase mb-2 tracking-wider">Check-out Date</p>
+          <p className="text-[#1e3a5f] font-bold text-sm">{data.checkOut}</p>
         </div>
-        <div className="hidden md:block">
-          <p className="text-[10px] text-gray-400 font-bold uppercase mb-1">Total Duration</p>
-          <p className="text-[#1e3a5f] font-bold">{data.duration}</p>
+        <div>
+          <p className="text-gray-400 text-[10px] font-bold uppercase mb-2 tracking-wider">Duration</p>
+          <p className="text-[#1e3a5f] font-bold text-sm">{data.duration}</p>
         </div>
       </div>
+    </div>
+  );
+}
+
+// Current Booking Card matching Image 3
+function BookingCard({ data }: any) {
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row gap-8">
+        <div className="relative w-full md:w-[320px] h-[200px] rounded-2xl overflow-hidden shadow-sm">
+          <Image src="/room-placeholder.jpg" alt="Room" fill className="object-cover" />
+        </div>
+        <div className="flex-1">
+          <h3 className="text-[#3498db] font-bold text-2xl mb-1">{data.id}</h3>
+          <p className="text-gray-400 text-sm mb-6">{data.date}</p>
+          <div className="grid grid-cols-2 gap-y-6 gap-x-12">
+            <DetailItem label="Room Number" value={data.roomNumber} />
+            <DetailItem label="Floor" value={data.floor} />
+            <DetailItem label="Room Type" value={data.roomType} />
+            <DetailItem label="Bed Number" value={data.bedNumber} />
+            <DetailItem label="Capacity" value={data.capacity} />
+          </div>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <DateBox label="Check-in Date" date={data.checkInDate} time={data.checkInTime} color="border-[#2ecc71]" />
+        <DateBox label="Expected Check-out Date" date={data.checkOutDate} time={data.checkOutTime} color="border-[#e67e22]" />
+        <div className="bg-white border border-[#3498db]/20 rounded-2xl p-6">
+          <p className="text-[#3498db] text-xs font-bold uppercase mb-4 flex items-center gap-2">
+             Duration <Calendar size={14} className="text-[#3498db]" />
+          </p>
+          <p className="text-2xl font-bold text-[#1e3a5f]">{data.duration}</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-12 pt-4">
+        <div className="flex items-center gap-3">
+          <span className="text-gray-400 text-sm font-medium">Status:</span>
+          <span className="bg-[#2ecc71] text-white text-[10px] px-4 py-1.5 rounded-full font-bold uppercase">
+            {data.status}
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-gray-400 text-sm font-medium">Source:</span>
+          <span className="bg-gray-100 text-gray-400 text-[10px] px-4 py-1.5 rounded-full font-bold uppercase">
+            {data.source}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DetailItem({ label, value }: { label: string, value: string }) {
+  return (
+    <div>
+      <p className="text-gray-400 text-xs font-semibold mb-1 uppercase tracking-wider">{label}</p>
+      <p className="text-[#1e3a5f] font-bold text-lg">{value}</p>
+    </div>
+  );
+}
+
+function DateBox({ label, date, time, color }: any) {
+  return (
+    <div className={`bg-white border ${color} rounded-2xl p-6`}>
+      <p className="text-gray-400 text-xs font-bold uppercase mb-4 flex items-center gap-2">
+        {label} <Calendar size={14} />
+      </p>
+      <p className="text-2xl font-bold text-[#1e3a5f] mb-3">{date}</p>
+      <p className="text-gray-400 text-xs font-bold uppercase mb-1 flex items-center gap-2">
+        Time <Clock size={14} />
+      </p>
+      <p className="text-xl font-bold text-[#1e3a5f]">{time}</p>
     </div>
   );
 }
@@ -299,4 +370,4 @@ export default function CrewDetailsPage() {
       <CrewDetailsContent />
     </Suspense>
   );
-}
+}                                                                                   

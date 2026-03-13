@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation"; 
 import { 
-  Search, RefreshCw, Download, ChevronLeft, ChevronRight, Users, Eye, ChevronDown 
+  Search, RefreshCw, Download, ChevronLeft, ChevronRight, ChevronDown 
 } from "lucide-react";
 
 interface GuestMember {
@@ -12,8 +12,7 @@ interface GuestMember {
   seamanId: string;
   rank: string;
   vessel: string;
-  email: string;
-  status: "Active" | "Inactive" | string;
+  status: string;
   source: string;
 }
 
@@ -22,16 +21,14 @@ export default function GuestlistPage() {
   const [guestData, setGuestData] = useState<GuestMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // MOCK DATA matching the image's "Data" placeholders
   const mockGuests: GuestMember[] = Array(10).fill(null).map((_, i) => ({
-    guestId: "Data",
-    name: i === 0 ? "John L. Doe" : "Data",
-    seamanId: i === 0 ? "0012385700" : "Data",
-    rank: i === 0 ? "Chief Officer" : "Data",
-    vessel: i === 0 ? "MV Pacific Star" : "Data",
-    email: i === 0 ? "john.doe@gmail.com" : "Data",
-    status: i === 0 ? "Active" : "Data",
-    source: i === 0 ? "Self-Service Kiosk" : "Data",
+    guestId: "000000" + (24 - i),
+    name: "John L. Doe",
+    seamanId: "0012385700",
+    rank: i < 5 ? "Chief Officer" : "Cadet",
+    vessel: "MV Pacific Star",
+    status: i === 0 ? "Confirmed" : "Data",
+    source: "Self-Service Kiosk",
   }));
 
   useEffect(() => {
@@ -51,13 +48,7 @@ export default function GuestlistPage() {
     fetchGuests();
   }, []);
 
-  // Helper to get initials for Avatar
-  const getInitials = (name: string) => {
-    if (name === "Data") return "D";
-    return name.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2);
-  };
-
-  // Navigation Handler
+  
   const handleViewDetails = (guest: GuestMember) => {
     const params = new URLSearchParams({
       id: guest.guestId,
@@ -65,29 +56,27 @@ export default function GuestlistPage() {
       rank: guest.rank,
       seamanId: guest.seamanId,
       vessel: guest.vessel,
-      email: guest.email,
       status: guest.status,
     });
     router.push(`/home/dashboard/guestlist/crewdetails?${params.toString()}`);
   };
 
   return (
-    <div className="p-10 flex flex-col min-h-screen bg-[#F8FAFC]">
-      {/* HEADER SECTION */}
+    <div className="p-10 flex flex-col min-h-screen bg-[#F8FAFC] font-sans">
       <header className="mb-6">
         <h1 className="text-[48px] font-bold text-[#1e3a5f] mb-8">Guestlist</h1>
         
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 flex-1">
-            <button onClick={() => window.location.reload()} className="p-2.5 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+            <button onClick={() => window.location.reload()} className="p-2.5 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
               <RefreshCw size={20} className={isLoading ? "animate-spin text-blue-500" : "text-gray-400"} />
             </button>
-            <div className="relative w-full max-w-md">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+            <div className="relative w-full max-w-sm">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input 
                 type="text" 
                 placeholder="Search" 
-                className="w-full pl-12 pr-4 py-2.5 bg-[#E2E8F0] border-none rounded-xl text-sm outline-none placeholder:text-gray-500" 
+                className="w-full pl-11 pr-4 py-2 bg-[#F1F5F9] border-none rounded-lg text-sm outline-none placeholder:text-gray-400 font-medium" 
               />
             </div>
           </div>
@@ -95,61 +84,59 @@ export default function GuestlistPage() {
           <div className="flex items-center gap-3">
             <FilterDropdown label="Status" />
             <FilterDropdown label="Availability" />
-            <button className="flex items-center gap-2 bg-[#3498db] text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-600 transition-all shadow-md shadow-blue-100">
-              Download PDF <Download size={18} />
+            <button className="flex items-center gap-2 bg-[#3498db] text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-blue-600 transition-all shadow-sm">
+              Download PDF <Download size={16} />
             </button>
           </div>
         </div>
       </header>
       
-      {/* TABLE SECTION */}
-      <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <table className="w-full text-left border-collapse">
-          <thead className="bg-[#E2E8F0] text-[#5a7184] text-[13px] font-bold">
+          <thead className="bg-[#F8FAFC] border-b border-gray-200">
             <tr>
-              <th className="px-6 py-4 w-10 text-center"><input type="checkbox" className="rounded border-gray-300" /></th>
-              <th className="px-6 py-4">Guest ID</th>
-              <th className="px-6 py-4">Guest Name</th>
-              <th className="px-6 py-4">Seaman ID</th>
-              <th className="px-6 py-4">Rank</th>
-              <th className="px-6 py-4">Vessel</th>
-              <th className="px-6 py-4">Email</th>
-              <th className="px-6 py-4">Status</th>
-              <th className="px-6 py-4">Sources</th>
-              <th className="px-6 py-4">Action</th>
+              <th className="px-5 py-4 w-10"><input type="checkbox" className="rounded border-gray-300" /></th>
+              <th className="px-4 py-4 text-[12px] font-bold text-gray-500 uppercase tracking-wider">Guest ID</th>
+              <th className="px-4 py-4 text-[12px] font-bold text-gray-500 uppercase tracking-wider">Guest Name</th>
+              <th className="px-4 py-4 text-[12px] font-bold text-gray-500 uppercase tracking-wider">Seaman ID</th>
+              <th className="px-4 py-4 text-[12px] font-bold text-gray-500 uppercase tracking-wider">Rank</th>
+              <th className="px-4 py-4 text-[12px] font-bold text-gray-500 uppercase tracking-wider">Vessel</th>
+              <th className="px-4 py-4 text-[12px] font-bold text-gray-500 uppercase tracking-wider">Status</th>
+              <th className="px-4 py-4 text-[12px] font-bold text-gray-500 uppercase tracking-wider">Sources</th>
+              <th className="px-4 py-4 text-[12px] font-bold text-gray-500 uppercase tracking-wider text-right pr-8">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {guestData.map((guest, idx) => (
-              <tr key={idx} className="hover:bg-gray-50/50 transition-colors group">
-                <td className="px-6 py-4 text-center"><input type="checkbox" className="rounded border-gray-300" /></td>
-                <td className="px-6 py-4 text-sm text-gray-500">{guest.guestId}</td>
-                <td className="px-6 py-4">
+              <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
+                <td className="px-5 py-3.5"><input type="checkbox" className="rounded border-gray-300" /></td>
+                <td className="px-4 py-3.5 text-sm text-gray-600 font-medium">{guest.guestId}</td>
+                <td className="px-4 py-3.5">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-[10px] font-bold text-white shrink-0 uppercase">
-                      {getInitials(guest.name)}
+                    <div className="w-9 h-9 rounded-full bg-[#64748b] flex items-center justify-center text-[11px] font-bold text-white shrink-0 border border-gray-300 shadow-sm">
+                      JD
                     </div>
-                    <span className="text-sm font-semibold text-[#1e3a5f]">{guest.name}</span>
+                    <span className="text-sm font-semibold text-gray-700">{guest.name}</span>
                   </div>
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-500">{guest.seamanId}</td>
-                <td className="px-6 py-4 text-sm text-gray-500">{guest.rank}</td>
-                <td className="px-6 py-4 text-sm text-gray-500">{guest.vessel}</td>
-                <td className="px-6 py-4 text-sm text-gray-500">{guest.email}</td>
-                <td className="px-6 py-4">
-                  {guest.status === "Active" ? (
-                    <span className="flex items-center gap-1.5 text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-100">
-                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full" /> Active
+                <td className="px-4 py-3.5 text-sm text-gray-500">{guest.seamanId}</td>
+                <td className="px-4 py-3.5 text-sm text-gray-500">{guest.rank}</td>
+                <td className="px-4 py-3.5 text-sm text-gray-500">{guest.vessel}</td>
+                <td className="px-4 py-3.5">
+                  {guest.status === "Confirmed" ? (
+                    <span className="flex items-center gap-1.5 text-[10px] font-bold text-green-600 bg-green-50 px-2.5 py-1 rounded-full border border-green-200 w-fit">
+                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full" /> Confirmed
                     </span>
                   ) : (
                     <span className="text-sm text-gray-500">{guest.status}</span>
                   )}
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-500">{guest.source}</td>
-                <td className="px-6 py-4">
+                <td className="px-4 py-3.5 text-sm text-gray-500">{guest.source}</td>
+                <td className="px-4 py-3.5 text-right pr-6">
+                  {/* onClick */}
                   <button 
                     onClick={() => handleViewDetails(guest)}
-                    className="bg-[#3498db] text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-600 transition-colors shadow-sm"
+                    className="bg-[#3498db] text-white px-5 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-600 transition-colors"
                   >
                     View
                   </button>
@@ -160,24 +147,24 @@ export default function GuestlistPage() {
         </table>
 
         {/* PAGINATION FOOTER */}
-        <div className="px-8 py-6 flex items-center justify-between border-t border-gray-100 bg-white">
-          <p className="text-sm text-gray-400 font-medium">Showing 1-10 out of 100</p>
-          <div className="flex items-center gap-2">
-            <button className="flex items-center gap-1 text-gray-400 hover:text-[#3498db] text-sm font-bold transition-colors">
+        <div className="px-6 py-4 flex items-center justify-between border-t border-gray-100 bg-white">
+          <p className="text-[13px] text-gray-400 font-medium italic">Showing 1-10 out of 100</p>
+          <div className="flex items-center gap-3">
+            <button className="flex items-center gap-1 text-gray-500 hover:text-[#3498db] text-sm font-semibold transition-colors">
               <ChevronLeft size={18} /> Previous
             </button>
-            <div className="flex items-center gap-1 mx-4">
+            <div className="flex items-center gap-1">
               {[1, 2, 3].map((p) => (
                 <button 
                   key={p} 
-                  className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${p === 1 ? "bg-[#3498db]/10 text-[#3498db] border border-[#3498db]/20" : "text-gray-400 hover:bg-gray-50"}`}
+                  className={`w-8 h-8 rounded-lg text-sm font-bold transition-all ${p === 1 ? "bg-[#3498db]/10 text-[#3498db] border border-blue-200" : "text-gray-400 hover:bg-gray-50"}`}
                 >
                   {p}
                 </button>
               ))}
               <span className="text-gray-300 mx-1">...</span>
             </div>
-            <button className="flex items-center gap-1 text-gray-400 hover:text-[#3498db] text-sm font-bold transition-colors">
+            <button className="flex items-center gap-1 text-gray-500 hover:text-[#3498db] text-sm font-semibold transition-colors">
               Next <ChevronRight size={18} />
             </button>
           </div>
@@ -189,8 +176,8 @@ export default function GuestlistPage() {
 
 function FilterDropdown({ label }: { label: string }) {
   return (
-    <button className="flex items-center justify-between gap-8 bg-[#E2E8F0] text-[#5a7184] px-4 py-2.5 rounded-xl text-sm font-bold min-w-[140px]">
-      {label} <ChevronDown size={16} />
+    <button className="flex items-center justify-between gap-4 bg-[#F1F5F9] text-gray-600 px-4 py-2.5 rounded-lg text-sm font-semibold min-w-[140px] hover:bg-gray-200 transition-colors">
+      {label} <ChevronDown size={16} className="text-gray-400" />
     </button>
   );
 }
