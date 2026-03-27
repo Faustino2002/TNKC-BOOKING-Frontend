@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, Users, CalendarCheck, BookOpen, 
-  Settings, LifeBuoy, ChevronDown, ChevronUp, ClipboardList
+  Settings, LifeBuoy, ChevronDown, ChevronUp 
 } from "lucide-react";
 
 export default function DashboardLayout({
@@ -40,18 +40,17 @@ export default function DashboardLayout({
           <NavItem href="/home/dashboard" icon={<LayoutDashboard size={22} />} label="Dashboard" isActive={pathname === "/home/dashboard"} />
           
           <NavItem 
-            href="/home/dashboard/guestlist" 
+            href="/home/guest-list" 
             icon={<Users size={22} />} 
             label="Guestlist" 
-            isActive={pathname.includes("/home/dashboard/guestlist")} 
+            isActive={pathname.includes("/home/guest-list")} 
           />
           
-          {/* UPDATED PATH FROM /pending TO /bookinglist */}
           <NavItem 
-            href="/home/dashboard/bookinglist" 
+            href="/home/booking-list" 
             icon={<CalendarCheck size={22} />} 
             label="Booking List" 
-            isActive={pathname.includes("/home/dashboard/bookinglist")} 
+            isActive={pathname.includes("/home/booking-list")} 
           />
 
           {/* DROPDOWN: Floor Catalog */}
@@ -73,9 +72,9 @@ export default function DashboardLayout({
             <div className={`overflow-hidden transition-all duration-300 ease-in-out hidden group-hover:block ${
               isCatalogOpen ? "max-h-40 opacity-100 mt-1" : "max-h-0 opacity-0"
             }`}>
-              <SubNavItem href="/home/dashboard/catalog/rooms" label="Room Catalog" isActive={pathname === "/home/dashboard/catalog/rooms"} />
-              <SubNavItem href="/home/dashboard/catalog/floor1" label="1st Floor" isActive={pathname === "/home/dashboard/catalog/floor1"} />
-              <SubNavItem href="/home/dashboard/catalog/floor2" label="2nd Floor" isActive={pathname === "/home/dashboard/catalog/floor2"} />
+              {/* UPDATED: Paths changed to reflect separate floor routes */}
+              <SubNavItem href="/home/floor-catalog/floor1" label="1st Floor" isActive={pathname === "/home/floor-catalog/floor1"} />
+              <SubNavItem href="/home/floor-catalog/floor2" label="2nd Floor" isActive={pathname === "/home/floor-catalog/floor2"} />
             </div>
           </div>
 

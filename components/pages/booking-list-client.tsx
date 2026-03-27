@@ -6,7 +6,7 @@ import {
   Search, RefreshCw, Check, X, Eye, PlusCircle
 } from "lucide-react";
 
-export default function BookingListPage() {
+export default function BookingListClient() {
   const router = useRouter();
   const [bookings, setBookings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,7 +28,7 @@ export default function BookingListPage() {
       setBookings([
         { dbId: "1200975771", bookingId: "#1200975771", name: "Maria S. Dela Cruz", checkIn: "06/25/2026", checkOut: "06/28/2026", status: "Pending" },
         { dbId: "1200975770", bookingId: "#1200975770", name: "Jane L. Doe", checkIn: "05/20/2026", checkOut: "05/22/2026", status: "Pending" },
-        { dbId: "1200975773", bookingId: "#1200975773", name: "System User", checkIn: "05/20/2026", checkOut: "05/22/2026", status: "Confirmed" },
+        { dbId: "1200975773", bookingId: "#1200975773", name: "System User", checkIn: "05/20/2026", checkOut: "05/22/2026", status: "Approved" },
       ]);
     } finally {
       setIsLoading(false);
@@ -57,17 +57,14 @@ export default function BookingListPage() {
     const { id, status } = pendingAction;
 
     try {
-      const response = await fetch("/api/bookings", {
+      setBookings(prev => prev.map(b => b.dbId === id ? { ...b, status } : b));
+      await fetch("/api/bookings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, status }),
       });
-
-      if (response.ok) {
-        setBookings(prev => prev.map(b => b.dbId === id ? { ...b, status } : b));
-      }
     } catch (error) {
-      setBookings(prev => prev.map(b => b.dbId === id ? { ...b, status } : b));
+      console.error("Update failed, state updated locally.");
     } finally {
       setIsModalOpen(false);
       setPendingAction(null);
@@ -89,8 +86,8 @@ export default function BookingListPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 text-sm font-semibold px-4 py-2 bg-white border border-gray-100 rounded-lg shadow-sm">
-              <span className="text-blue-400">Pending</span> <span className="text-gray-300">97</span>
+            <div className="flex items-center gap-2 text-sm font-semibold px-4 py-2 bg-white border border-red-100 rounded-lg shadow-sm">
+              <span className="text-red-500">Pending</span> <span className="text-gray-400">97</span>
             </div>
             <button className="flex items-center gap-2 px-6 py-2.5 bg-[#3498db] text-white rounded-lg font-bold text-sm shadow-md hover:bg-blue-600 transition-all">
               Add booking <PlusCircle size={18} />
@@ -129,11 +126,13 @@ export default function BookingListPage() {
                 <td className="px-4 py-4 text-[13px] text-gray-500">{booking.checkOut}</td>
                 <td className="px-4 py-4">
                   <div className={`flex items-center gap-2 px-3 py-1 rounded-full border w-fit ${
-                    booking.status === "Confirmed" 
+                    booking.status === "Approved" 
                     ? "bg-green-50 text-green-600 border-green-100" 
                     : "bg-red-50 text-red-500 border-red-100"
                   }`}>
-                    <div className={`w-1.5 h-1.5 rounded-full ${booking.status === "Confirmed" ? "bg-green-500" : "bg-red-500"}`} />
+                    <div className={`w-1.5 h-1.5 rounded-full ${
+                      booking.status === "Approved" ? "bg-green-500" : "bg-red-500"
+                    }`} />
                     <span className="text-[11px] font-bold uppercase tracking-tight">{booking.status}</span>
                   </div>
                 </td>
@@ -146,14 +145,14 @@ export default function BookingListPage() {
                   </button>
 
                   {openMenuId === booking.dbId && (
-                    <div ref={menuRef} className="absolute right-4 top-14 w-44 bg-white border border-gray-100 rounded-xl shadow-2xl z-50 py-2 animate-in fade-in zoom-in-95 duration-150">
-                      <button onClick={() => handleActionClick(booking.dbId, booking.name, "Confirmed")} className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-[#2ecc71] hover:bg-gray-50 font-bold border-b border-gray-50/50">
+                    <div ref={menuRef} className="absolute right-4 top-14 w-44 bg-white border border-gray-100 rounded-xl shadow-2xl z-50 py-2">
+                      <button onClick={() => handleActionClick(booking.dbId, booking.name, "Approved")} className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-[#2ecc71] hover:bg-gray-50 font-bold border-b border-gray-50/50">
                         <Check size={16} /> Approve
                       </button>
                       <button onClick={() => handleActionClick(booking.dbId, booking.name, "Rejected")} className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-[#e74c3c] hover:bg-gray-50 font-bold border-b border-gray-50/50">
                         <X size={16} /> Reject
                       </button>
-                      <button onClick={() => router.push(`/home/dashboard/bookinglist/bookingdetails?id=${booking.dbId}`)} className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-[#3498db] hover:bg-gray-50 font-bold">
+                      <button onClick={() => router.push(`/home/booking-list/booking-details?id=${booking.dbId}`)} className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-[#3498db] hover:bg-gray-50 font-bold">
                         <Eye size={16} /> View Details
                       </button>
                     </div>
@@ -166,22 +165,21 @@ export default function BookingListPage() {
       </div>
 
       {isModalOpen && pendingAction && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/20 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-[480px] p-8 border border-gray-100 animate-in zoom-in-95 duration-200">
-            <div className="flex items-start justify-between">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/20 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-[480px] p-8 border border-gray-100">
+            <div className="flex items-start justify-between text-left">
               <div className="flex gap-5">
                 <div className="w-14 h-14 rounded-xl bg-[#FEE2E2] flex items-center justify-center shrink-0">
                   <div className="w-7 h-7 bg-[#EF4444] rounded-full flex items-center justify-center">
                     <span className="text-white font-bold text-sm">!</span>
                   </div>
                 </div>
-                
                 <div>
                   <h3 className="text-[22px] font-bold text-[#EF4444]">
-                    {pendingAction.status === "Confirmed" ? "Approve" : "Reject"} Book Request
+                    {pendingAction.status} Book Request
                   </h3>
                   <p className="text-gray-600 text-[15px] mt-2 leading-snug">
-                    Are you sure you want to {pendingAction.status === "Confirmed" ? "approve" : "reject"} {pendingAction.name} booking request?
+                    Are you sure you want to {pendingAction.status.toLowerCase()} {pendingAction.name} booking request?
                   </p>
                 </div>
               </div>
@@ -189,19 +187,11 @@ export default function BookingListPage() {
                 <X size={20} />
               </button>
             </div>
-
             <div className="flex justify-end gap-3 mt-10">
-              <button 
-                onClick={() => setIsModalOpen(false)} 
-                className="px-6 py-2 border border-gray-200 rounded-lg text-gray-600 font-semibold text-sm hover:bg-gray-50"
-              >
+              <button onClick={() => setIsModalOpen(false)} className="px-6 py-2 border border-gray-200 rounded-lg text-gray-600 font-semibold text-sm hover:bg-gray-50">
                 Cancel
               </button>
-              
-              <button 
-                onClick={confirmAction}
-                className="px-8 py-2.5 rounded-lg text-white font-bold text-sm bg-[#EF4444] hover:bg-red-600 shadow-md transition-all"
-              >
+              <button onClick={confirmAction} className="px-8 py-2.5 rounded-lg text-white font-bold text-sm bg-[#EF4444] hover:bg-red-600 shadow-md">
                 Continue
               </button>
             </div>

@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { ChevronDown, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
-function BookingDetailsContent() {
+export default function BookingDetailsClient() {
   const searchParams = useSearchParams();
   const bookingId = searchParams.get("id");
   
@@ -17,13 +17,12 @@ function BookingDetailsContent() {
       if (!bookingId) return;
       setIsLoading(true);
       try {
-        // 1. API CALL: Tries to fetch the specific user by ID
         const response = await fetch(`/api/bookings/${bookingId}`);
         if (!response.ok) throw new Error("Guest not found");
         const data = await response.json();
         setCurrentGuest(data);
       } catch (error) {
-        // 2. FALLBACK: Mock data used if the API isn't built yet
+        // Fallback Mock Data
         const allGuestsMock = [
           { id: "1200975771", name: "Maria S. Dela Cruz", rank: "Cadet", vessel: "MV Pacific Star", seamanId: "0058900921", image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&h=200&auto=format&fit=crop", fileName: "Passport_Maria_DelaCruz.jpeg" },
           { id: "1200975770", name: "Jane L. Doe", rank: "Chief Officer", vessel: "MV Pacific Star", seamanId: "0099887766", image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200&h=200&auto=format&fit=crop", fileName: "Passport_Jane_Doe.jpeg" },
@@ -43,7 +42,7 @@ function BookingDetailsContent() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#F3F4F6] text-gray-400">
         <Loader2 className="animate-spin mb-2" size={32} />
-        <p>Loading guest details...</p>
+        <p className="font-medium">Loading guest details...</p>
       </div>
     );
   }
@@ -64,7 +63,7 @@ function BookingDetailsContent() {
         </header>
 
         <div className="bg-white rounded-md shadow-sm p-10 space-y-12">
-          <section className="flex gap-12">
+          <section className="flex flex-col md:flex-row gap-12">
             <div className="w-48 pt-2">
               <h2 className="text-xl font-semibold text-gray-800">Profile</h2>
             </div>
@@ -79,23 +78,23 @@ function BookingDetailsContent() {
 
               <div className="space-y-1">
                 <label className="text-[13px] font-semibold text-gray-500">Seaman ID</label>
-                <Input readOnly value={currentGuest.seamanId} className="h-10 border-slate-200 rounded-md text-gray-600 bg-white" />
+                <Input readOnly value={currentGuest.seamanId} className="h-10 border-slate-200 rounded-md text-gray-600 bg-white focus-visible:ring-0" />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-[13px] font-semibold text-gray-500">Rank</label>
-                  <Input readOnly value={currentGuest.rank} className="h-10 border-slate-200 rounded-md text-gray-600 bg-white" />
+                  <Input readOnly value={currentGuest.rank} className="h-10 border-slate-200 rounded-md text-gray-600 bg-white focus-visible:ring-0" />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[13px] font-semibold text-gray-500">Vessel</label>
-                  <Input readOnly value={currentGuest.vessel} className="h-10 border-slate-200 rounded-md text-gray-600 bg-white" />
+                  <Input readOnly value={currentGuest.vessel} className="h-10 border-slate-200 rounded-md text-gray-600 bg-white focus-visible:ring-0" />
                 </div>
               </div>
 
               <div className="space-y-1">
                 <label className="text-[13px] font-semibold text-gray-500">Purpose of Stay</label>
-                <div className="flex justify-between items-center h-10 px-3 border border-slate-200 bg-slate-50/30 rounded-md text-gray-400 cursor-pointer text-sm">
+                <div className="flex justify-between items-center h-10 px-3 border border-slate-200 bg-slate-50/30 rounded-md text-gray-400 cursor-pointer text-sm hover:bg-slate-50 transition-colors">
                   <span>Select Purpose</span>
                   <ChevronDown size={16} />
                 </div>
@@ -103,33 +102,25 @@ function BookingDetailsContent() {
             </div>
           </section>
 
-          <section className="flex gap-12 pt-8 border-t border-gray-50">
+          <section className="flex flex-col md:flex-row gap-12 pt-8 border-t border-gray-50">
             <div className="w-48 pt-2">
               <h2 className="text-xl font-semibold text-gray-800">Document</h2>
             </div>
 
             <div className="flex-1 border border-slate-200 rounded-xl p-6">
               <label className="text-[13px] font-semibold text-gray-500 mb-3 block">Upload Government ID</label>
-              <div className="border border-slate-100 rounded-lg p-1.5 inline-block bg-white shadow-sm overflow-hidden">
+              <div className="border border-slate-100 rounded-lg p-1.5 inline-block bg-white shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                 <img 
                   src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Sample_Passport_Image.png/640px-Sample_Passport_Image.png" 
                   alt="ID Document" 
                   className="h-32 rounded-md opacity-90"
                 />
               </div>
-              <p className="text-[11px] text-gray-400 mt-2 font-medium">{currentGuest.fileName}</p>
+              <p className="text-[11px] text-gray-400 mt-2 font-medium tracking-wide">{currentGuest.fileName}</p>
             </div>
           </section>
         </div>
       </div>
     </div>
-  );
-}
-
-export default function BookingDetailsPage() {
-  return (
-    <Suspense fallback={<div className="p-10 text-center">Loading...</div>}>
-      <BookingDetailsContent />
-    </Suspense>
   );
 }
