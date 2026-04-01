@@ -1,27 +1,42 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  LayoutDashboard, Users, CalendarCheck, BookOpen, 
-  Settings, LifeBuoy, ChevronDown, ChevronUp 
-} from "lucide-react";
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+// Relative path to find the routes folder at the project root
+import { homeRoutes } from "../../routes/homeRoutes"; 
+
+// Reusable sidebar components (Task 3)
+import NavItem from "@/components/sidebar/NavItem";
+import DropdownNavItem from "@/components/sidebar/DropdownNavItem";
+
+// Dynamic Breadcrumb Component (Task 5)
+import Breadcrumbs from "@/components/navigation/Breadcrumbs";
+
+// Define strict types for TypeScript (Task 4)
+interface RouteItem {
+  label: string;
+  href?: string;
+  icon: any;
+  children?: { label: string; href: string }[];
+}
+
+interface RouteSection {
+  section: string;
+  items: RouteItem[];
+}
+
+export default function HomeLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [isCatalogOpen, setIsCatalogOpen] = useState(false);
 
   return (
     <div className="flex h-screen w-full bg-[#F8FAFC] font-sans overflow-hidden">
       
-      {/* SHARED SIDEBAR */}
+      {/* SIDEBAR - pure UI renderer (Task 2) */}
       <aside className="group w-20 hover:w-64 bg-white border-r border-gray-100 flex flex-col transition-all duration-300 ease-in-out shadow-sm z-30 overflow-hidden">
+        
+        {/* LOGO SECTION */}
         <div className="flex items-center px-5 py-8 h-24 shrink-0">
           <div className="relative h-10 w-10 shrink-0">
             <Image src="/logoonly.png" alt="Logo" fill className="object-contain" />
@@ -31,65 +46,43 @@ export default function DashboardLayout({
           </span>
         </div>
 
-        <nav className="flex-1 px-4 space-y-2">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4 px-2">
-            <span className="group-hover:hidden block text-center">...</span>
-            <span className="hidden group-hover:block">Menu</span>
-          </p>
-          
-          <NavItem href="/home/dashboard" icon={<LayoutDashboard size={22} />} label="Dashboard" isActive={pathname === "/home/dashboard"} />
-          
-          <NavItem 
-            href="/home/guest-list" 
-            icon={<Users size={22} />} 
-            label="Guestlist" 
-            isActive={pathname.includes("/home/guest-list")} 
-          />
-          
-          <NavItem 
-            href="/home/booking-list" 
-            icon={<CalendarCheck size={22} />} 
-            label="Booking List" 
-            isActive={pathname.includes("/home/booking-list")} 
-          />
+        {/* NAVIGATION - Dynamic loop through homeRoutes (Task 1 & 2) */}
+        <nav className="flex-1 px-4 space-y-6 overflow-y-auto">
+          {homeRoutes.map((section: RouteSection) => (
+            <div key={section.section}>
+              
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4 px-2">
+                <span className="group-hover:hidden block text-center">...</span>
+                <span className="hidden group-hover:block">{section.section}</span>
+              </p>
 
-          {/* DROPDOWN: Floor Catalog */}
-          <div className="relative">
-            <button 
-              onClick={() => setIsCatalogOpen(!isCatalogOpen)}
-              className={`w-full flex items-center rounded-lg cursor-pointer transition-all duration-200 h-12 px-3 
-                ${isCatalogOpen ? "text-[#3282B8] bg-[#E7F0FF]" : "text-gray-400 hover:bg-[#E7F0FF] hover:text-[#3282B8]"}`}
-            >
-              <div className="shrink-0 w-6 flex justify-center"><BookOpen size={22} /></div>
-              <span className="ml-4 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap flex-1 text-left">
-                Floor Catalog
-              </span>
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                {isCatalogOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              <div className="space-y-2">
+                {section.items.map((item: RouteItem) => (
+                  item.children ? (
+                    // DropdownNavItem handles its own expandable logic (Task 3)
+                    <DropdownNavItem key={item.label} item={item} />
+                  ) : (
+                    // NavItem for single navigation links (Task 3)
+                    <NavItem
+                      key={item.href}
+                      href={item.href!}
+                      icon={<item.icon size={22} />}
+                      label={item.label}
+                      // Active route detection (Task 4)
+                      isActive={pathname === item.href || pathname.startsWith(item.href!)}
+                    />
+                  )
+                ))}
               </div>
-            </button>
-
-            <div className={`overflow-hidden transition-all duration-300 ease-in-out hidden group-hover:block ${
-              isCatalogOpen ? "max-h-40 opacity-100 mt-1" : "max-h-0 opacity-0"
-            }`}>
-              {/* UPDATED: Paths changed to reflect separate floor routes */}
-              <SubNavItem href="/home/floor-catalog/floor1" label="1st Floor" isActive={pathname === "/home/floor-catalog/floor1"} />
-              <SubNavItem href="/home/floor-catalog/floor2" label="2nd Floor" isActive={pathname === "/home/floor-catalog/floor2"} />
             </div>
-          </div>
-
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4 mt-8 px-2">
-            <span className="group-hover:hidden block text-center">...</span>
-            <span className="hidden group-hover:block">General</span>
-          </p>
-          
-          <NavItem href="/home/dashboard/settings" icon={<Settings size={22} />} label="Settings" isActive={pathname === "/home/dashboard/settings"} />
-          <NavItem href="/home/dashboard/support" icon={<LifeBuoy size={22} />} label="Support" isActive={pathname === "/home/dashboard/support"} />
+          ))}
         </nav>
 
-        {/* Profile Section */}
+        {/* USER PROFILE FOOTER */}
         <div className="mt-auto p-4 border-t border-gray-50 flex items-center shrink-0">
-          <div className="h-10 w-10 rounded-full bg-[#3498db] flex items-center justify-center text-white font-bold shrink-0 shadow-sm">KM</div>
+          <div className="h-10 w-10 rounded-full bg-[#3498db] flex items-center justify-center text-white font-bold shrink-0 shadow-sm">
+            KM
+          </div>
           <div className="ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
             <p className="text-sm font-bold text-black">Klare Marasigan</p>
             <p className="text-[11px] text-gray-400">Frontdesk</p>
@@ -97,35 +90,15 @@ export default function DashboardLayout({
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto">
-        {children}
+      {/* MAIN CONTENT AREA */}
+      <main className="flex-1 overflow-y-auto p-8">
+        {/* Dynamic Breadcrumbs matching current route (Task 5) */}
+        <Breadcrumbs />
+        
+        <div className="mt-4">
+          {children}
+        </div>
       </main>
     </div>
-  );
-}
-
-function NavItem({ icon, label, isActive, href }: { icon: React.ReactNode, label: string, isActive: boolean, href: string }) {
-  return (
-    <Link href={href}>
-      <div className={`flex items-center rounded-lg cursor-pointer transition-all duration-200 h-12 px-3 
-        ${isActive ? "bg-[#3498db] text-white shadow-md" : "text-gray-400 hover:bg-[#E7F0FF] hover:text-[#3282B8]"}`}>
-        <div className="shrink-0 w-6 flex justify-center">{icon}</div>
-        <span className="ml-4 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap overflow-hidden">
-          {label}
-        </span>
-      </div>
-    </Link>
-  );
-}
-
-function SubNavItem({ href, label, isActive }: { href: string, label: string, isActive: boolean }) {
-  return (
-    <Link href={href}>
-      <div className={`pl-14 py-2 text-sm font-medium transition-colors hover:text-[#3282B8] ${
-        isActive ? "text-[#3282B8]" : "text-gray-400"
-      }`}>
-        {label}
-      </div>
-    </Link>
   );
 }
