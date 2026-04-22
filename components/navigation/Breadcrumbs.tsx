@@ -1,63 +1,72 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
+import React, { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { ChevronRight, Home } from "lucide-react";
 import { homeRoutes } from "@/routes/homeRoutes";
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 
 export default function Breadcrumbs() {
   const pathname = usePathname();
-  
-  // Function to find the label and parent for the current path
+  const [userName, setUserName] = useState("");
+
+  // Grab the name from storage when the component mounts
+  useEffect(() => {
+    const storedName = localStorage.getItem("userFullName");
+    if (storedName) setUserName(storedName);
+  }, []);
+
   const getBreadcrumbs = () => {
     const crumbs: { label: string; href: string }[] = [];
     
+    // Always start with Home
+    crumbs.push({ label: "Home", href: "/home" });
+
     homeRoutes.forEach((section) => {
       section.items.forEach((item) => {
-        // Check if the main item matches
-        if (item.href === pathname) {
-          crumbs.push({ label: item.label, href: item.href });
+        if (item.href && pathname.includes(item.href) && item.href !== "/home") {
+          let displayLabel = item.label;
+          if (item.href === "/home/user-dashboard" && userName) {
+            displayLabel = `Welcome, ${userName}`;
+          }
+          crumbs.push({ label: displayLabel, href: item.href });
         }
         
-        // Check if any children (sub-items) match
         if (item.children) {
           const childMatch = item.children.find((child) => child.href === pathname);
-          if (childMatch) {
-            crumbs.push({ label: item.label, href: item.href || "#" });
+          if (childMatch && childMatch.href) {
             crumbs.push({ label: childMatch.label, href: childMatch.href });
           }
         }
       });
     });
 
-    return crumbs;
+    return Array.from(new Map(crumbs.map(c => [c.href, c])).values());
   };
 
   const breadcrumbs = getBreadcrumbs();
 
-  // Don't render if we are just at /home
   if (pathname === "/home" || breadcrumbs.length === 0) return null;
 
   return (
-    <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-6">
-      <Link href="/home/dashboard" className="hover:text-[#3282B8] transition-colors">
-        <Home size={16} />
-      </Link>
-      
+    <div className="flex items-center gap-2"> {/* Restored original flex feel */}
       {breadcrumbs.map((crumb, index) => (
         <React.Fragment key={crumb.href}>
-          <ChevronRight size={14} className="text-gray-300" />
-          <Link
-            href={crumb.href}
-            className={`hover:text-[#3282B8] transition-colors ${
-              index === breadcrumbs.length - 1 ? "font-semibold text-black pointer-events-none" : ""
-            }`}
-          >
-            {crumb.label}
-          </Link>
+          {index > 0 && <ChevronRight size={14} className="text-gray-400" />}
+          
+          <span>
+            {index === breadcrumbs.length - 1 ? (
+              // Active page - Restored to your original span style
+              <span>{crumb.label}</span>
+            ) : (
+              // Clickable parents - Standard link style
+              <Link href={crumb.href} className="text-blue-500 hover:underline">
+                {crumb.label}
+              </Link>
+            )}
+          </span>
         </React.Fragment>
       ))}
-    </nav>
+    </div>
   );
 }

@@ -5,8 +5,10 @@ import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LoginForm } from "./login-form";
 import { ForgotPasswordForm } from "./forgot-password-form";
+import { useRouter } from "next/navigation"; 
 
 export function AuthContent() {
+  const router = useRouter(); 
   const [view, setView] = useState<"login" | "forgot">("login");
   const [showSuccess, setShowSuccess] = useState(false);
   const [username, setUsername] = useState("");
@@ -19,23 +21,46 @@ export function AuthContent() {
   const [emailError, setEmailError] = useState(false);
   const [emailInvalid, setEmailInvalid] = useState(false);
 
-  // --- YOUR EXACT LOGIC START ---
   const handleLogin = () => {
     const uError = username.trim() === "";
     const pError = password.trim() === "";
+    
     setFieldErrors({ username: uError, password: pError });
-    if (uError || pError) { setLoginError(false); return; }
+    
+    if (uError || pError) { 
+      setLoginError(false); 
+      return; 
+    }
 
-    if (username !== "admin" || password !== "1234") {
-      setLoginError(true);
-      setFailedAttempts((prev) => prev + 1);
-    } else {
+    if (username === "admin" && password === "1234") {
+      // ADMIN FLOW
       setLoginError(false);
       setFailedAttempts(0);
-      alert("Login Success!");
+
+      // --- ADDED: PERSIST ADMIN DATA ---
+      localStorage.setItem("userFullName", "Klare Marasigan");
+      localStorage.setItem("userRole", "Frontdesk");
+      
+      router.push("/home/dashboard"); 
+      
+    } else if (username === "user" && password === "user123") {
+      // USER FLOW
+      setLoginError(false);
+      setFailedAttempts(0);
+
+      // --- ADDED: PERSIST USER DATA ---
+      localStorage.setItem("userFullName", "Randolph Faustino");
+      localStorage.setItem("userRole", "Guest");
+
+      router.push("/home/user-dashboard"); 
+      
+    } else {
+      setLoginError(true);
+      setFailedAttempts((prev) => prev + 1);
     }
   };
 
+  // ... (Rest of your handleResetLink and JSX remains exactly the same)
   const handleResetLink = () => {
     const emailTrimmed = email.trim();
     if (emailTrimmed === "") { setEmailError(true); setEmailInvalid(false); return; }
@@ -43,7 +68,6 @@ export function AuthContent() {
     if (!emailRegex.test(emailTrimmed)) { setEmailInvalid(true); setEmailError(false); return; }
     setEmailError(false); setEmailInvalid(false); setShowSuccess(true);
   };
-  // --- YOUR EXACT LOGIC END ---
 
   const isLockedOut = failedAttempts >= 3;
 

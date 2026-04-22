@@ -72,22 +72,30 @@ export default function BookingListClient() {
   };
 
   return (
-    <div className="p-10 flex flex-col min-h-screen bg-[#F8FAFC] relative font-sans text-slate-900">
-      <header className="mb-8">
-        <h1 className="text-[44px] font-bold text-[#1e3a5f]">Booking List</h1>
-        <div className="mt-8 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <button onClick={fetchBookings} className="p-2.5 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition-all">
+    <div className="w-full flex flex-col min-h-screen bg-transparent relative font-sans text-slate-900">
+      
+      {/* HEADER SECTION - Title removed to prevent duplication with Breadcrumbs */}
+      <header className="mb-8 w-full">
+        <div className="flex items-center justify-between gap-4 w-full">
+          <div className="flex items-center gap-4 flex-1">
+            <button onClick={fetchBookings} className="p-2.5 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition-all shrink-0">
               <RefreshCw size={20} className={`${isLoading ? "animate-spin text-blue-500" : "text-gray-400"}`} />
             </button>
-            <div className="relative">
+            
+            <div className="relative w-full max-w-xl">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <input type="text" placeholder="Search" className="pl-10 pr-4 py-2.5 border border-gray-200 bg-white rounded-lg w-80 text-sm outline-none focus:ring-2 focus:ring-blue-100 shadow-sm" />
+              <input 
+                type="text" 
+                placeholder="Search bookings..." 
+                className="pl-10 pr-4 py-2.5 border border-gray-200 bg-white rounded-lg w-full text-sm outline-none focus:ring-2 focus:ring-blue-100 shadow-sm" 
+              />
             </div>
           </div>
-          <div className="flex items-center gap-3">
+
+          <div className="flex items-center gap-3 shrink-0">
             <div className="flex items-center gap-2 text-sm font-semibold px-4 py-2 bg-white border border-red-100 rounded-lg shadow-sm">
-              <span className="text-red-500">Pending</span> <span className="text-gray-400">97</span>
+              <span className="text-red-500">Pending</span> 
+              <span className="bg-red-50 text-red-600 px-2 py-0.5 rounded-md text-xs font-bold">97</span>
             </div>
             <button className="flex items-center gap-2 px-6 py-2.5 bg-[#3498db] text-white rounded-lg font-bold text-sm shadow-md hover:bg-blue-600 transition-all">
               Add booking <PlusCircle size={18} />
@@ -96,72 +104,78 @@ export default function BookingListClient() {
         </div>
       </header>
 
-      <div className="bg-white border border-gray-100 rounded-xl overflow-visible shadow-sm">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="border-b border-gray-100">
-              <th className="px-6 py-5 w-12"><input type="checkbox" className="rounded border-gray-300 text-blue-500" /></th>
-              <th className="px-4 py-5 text-[13px] font-bold text-[#1e3a5f]">Booking ID</th>
-              <th className="px-4 py-5 text-[13px] font-bold text-[#1e3a5f]">Guest Name</th>
-              <th className="px-4 py-5 text-[13px] font-bold text-[#1e3a5f]">Check-in</th>
-              <th className="px-4 py-5 text-[13px] font-bold text-[#1e3a5f]">Check-out</th>
-              <th className="px-4 py-5 text-[13px] font-bold text-[#1e3a5f]">Status</th>
-              <th className="px-4 py-5 text-[13px] font-bold text-[#1e3a5f] text-center">Action</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50">
-            {bookings.map((booking) => (
-              <tr key={booking.dbId} className="hover:bg-gray-50/50 transition-colors group">
-                <td className="px-6 py-4"><input type="checkbox" className="rounded border-gray-300" /></td>
-                <td className="px-4 py-4 text-[13px] text-gray-500 font-medium">{booking.bookingId}</td>
-                <td className="px-4 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-[#1e3a5f] flex items-center justify-center text-white text-[10px] font-bold">
-                      {booking.name.split(' ').map((n: string) => n[0]).join('')}
+      {/* TABLE CONTAINER */}
+      <div className="w-full bg-white border border-gray-100 rounded-xl overflow-visible shadow-sm">
+        <div className="overflow-x-auto w-full">
+            <table className="w-full text-left border-collapse">
+            <thead>
+                <tr className="border-b border-gray-100 bg-slate-50/30">
+                <th className="px-6 py-5 w-12"><input type="checkbox" className="rounded border-gray-300 text-blue-500" /></th>
+                <th className="px-4 py-5 text-[13px] font-bold text-[#1e3a5f] uppercase tracking-wider">Booking ID</th>
+                <th className="px-4 py-5 text-[13px] font-bold text-[#1e3a5f] uppercase tracking-wider">Guest Name</th>
+                <th className="px-4 py-5 text-[13px] font-bold text-[#1e3a5f] uppercase tracking-wider">Check-in</th>
+                <th className="px-4 py-5 text-[13px] font-bold text-[#1e3a5f] uppercase tracking-wider">Check-out</th>
+                <th className="px-4 py-5 text-[13px] font-bold text-[#1e3a5f] uppercase tracking-wider">Status</th>
+                <th className="px-4 py-5 text-[13px] font-bold text-[#1e3a5f] uppercase tracking-wider text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+                {bookings.map((booking) => (
+                <tr key={booking.dbId} className="hover:bg-blue-50/20 transition-colors group">
+                    <td className="px-6 py-4"><input type="checkbox" className="rounded border-gray-300" /></td>
+                    <td className="px-4 py-4 text-[13px] text-gray-500 font-medium">{booking.bookingId}</td>
+                    <td className="px-4 py-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-[#1e3a5f] flex items-center justify-center text-white text-[10px] font-bold shrink-0">
+                        {booking.name.split(' ').map((n: string) => n[0]).join('')}
+                        </div>
+                        <span className="text-[13px] text-gray-700 font-semibold truncate max-w-[150px]">{booking.name}</span>
                     </div>
-                    <span className="text-[13px] text-gray-700 font-semibold">{booking.name}</span>
-                  </div>
-                </td>
-                <td className="px-4 py-4 text-[13px] text-gray-500">{booking.checkIn}</td>
-                <td className="px-4 py-4 text-[13px] text-gray-500">{booking.checkOut}</td>
-                <td className="px-4 py-4">
-                  <div className={`flex items-center gap-2 px-3 py-1 rounded-full border w-fit ${
-                    booking.status === "Approved" 
-                    ? "bg-green-50 text-green-600 border-green-100" 
-                    : "bg-red-50 text-red-500 border-red-100"
-                  }`}>
-                    <div className={`w-1.5 h-1.5 rounded-full ${
-                      booking.status === "Approved" ? "bg-green-500" : "bg-red-500"
-                    }`} />
-                    <span className="text-[11px] font-bold uppercase tracking-tight">{booking.status}</span>
-                  </div>
-                </td>
-                <td className="px-4 py-4 text-center relative">
-                  <button 
-                    onClick={() => setOpenMenuId(openMenuId === booking.dbId ? null : booking.dbId)}
-                    className="px-6 py-1.5 bg-[#3498db] text-white text-[13px] font-bold rounded-lg shadow-sm hover:bg-blue-600 transition-all"
-                  >
-                    Manage
-                  </button>
+                    </td>
+                    <td className="px-4 py-4 text-[13px] text-gray-500">{booking.checkIn}</td>
+                    <td className="px-4 py-4 text-[13px] text-gray-500">{booking.checkOut}</td>
+                    <td className="px-4 py-4">
+                    <div className={`flex items-center gap-2 px-3 py-1 rounded-full border w-fit ${
+                        booking.status === "Approved" 
+                        ? "bg-green-50 text-green-600 border-green-100" 
+                        : "bg-red-50 text-red-500 border-red-100"
+                    }`}>
+                        <div className={`w-1.5 h-1.5 rounded-full ${
+                        booking.status === "Approved" ? "bg-green-500" : "bg-red-500"
+                        }`} />
+                        <span className="text-[11px] font-bold uppercase tracking-tight">{booking.status}</span>
+                    </div>
+                    </td>
+                    <td className="px-4 py-4 text-center relative overflow-visible">
+                    <button 
+                        onClick={() => setOpenMenuId(openMenuId === booking.dbId ? null : booking.dbId)}
+                        className="px-6 py-1.5 bg-[#3498db] text-white text-[13px] font-bold rounded-lg shadow-sm hover:bg-blue-600 transition-all"
+                    >
+                        Manage
+                    </button>
 
-                  {openMenuId === booking.dbId && (
-                    <div ref={menuRef} className="absolute right-4 top-14 w-44 bg-white border border-gray-100 rounded-xl shadow-2xl z-50 py-2">
-                      <button onClick={() => handleActionClick(booking.dbId, booking.name, "Approved")} className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-[#2ecc71] hover:bg-gray-50 font-bold border-b border-gray-50/50">
-                        <Check size={16} /> Approve
-                      </button>
-                      <button onClick={() => handleActionClick(booking.dbId, booking.name, "Rejected")} className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-[#e74c3c] hover:bg-gray-50 font-bold border-b border-gray-50/50">
-                        <X size={16} /> Reject
-                      </button>
-                      <button onClick={() => router.push(`/home/booking-list/booking-details?id=${booking.dbId}`)} className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-[#3498db] hover:bg-gray-50 font-bold">
-                        <Eye size={16} /> View Details
-                      </button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                    {openMenuId === booking.dbId && (
+                        <div 
+                        ref={menuRef} 
+                        className="absolute right-4 top-full mt-2 w-44 bg-white border border-gray-100 rounded-xl shadow-2xl z-50 py-2 animate-in fade-in zoom-in-95 duration-200"
+                        >
+                        <button onClick={() => handleActionClick(booking.dbId, booking.name, "Approved")} className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-[#2ecc71] hover:bg-gray-50 font-bold border-b border-gray-50/50 text-left">
+                            <Check size={16} /> Approve
+                        </button>
+                        <button onClick={() => handleActionClick(booking.dbId, booking.name, "Rejected")} className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-[#e74c3c] hover:bg-gray-50 font-bold border-b border-gray-50/50 text-left">
+                            <X size={16} /> Reject
+                        </button>
+                        <button onClick={() => router.push(`/home/booking-list/booking-details?id=${booking.dbId}`)} className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-[#3498db] hover:bg-gray-50 font-bold text-left">
+                            <Eye size={16} /> View Details
+                        </button>
+                        </div>
+                    )}
+                    </td>
+                </tr>
+                ))}
+            </tbody>
+            </table>
+        </div>
       </div>
 
       {isModalOpen && pendingAction && (

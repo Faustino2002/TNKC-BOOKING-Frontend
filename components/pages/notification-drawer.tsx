@@ -13,7 +13,7 @@ export function NotificationDrawer({ isOpen, onOpenChange, notifications }: any)
           // THE FIX: !fixed and !z-[100] ensures it sits above the dashboard header (z-40)
           // data-[state=open]:!translate-x-0 forces it onto the screen even if animations glitch
           className="
-            !fixed !inset-y-0 !right-0 !z-[100] 
+            
             w-full sm:max-w-[460px] bg-white border-none 
             rounded-l-[40px] p-0 shadow-2xl 
             data-[state=open]:!translate-x-0 !duration-0
