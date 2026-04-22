@@ -18,7 +18,6 @@ const MOCK_DATA: Record<string, Room[]> = {
   ]
 };
 
-// Mock Bed Data specifically for Shared Cabins
 const MOCK_BED_DATA = [
   { id: "A1", status: "Occupied", guest: "Joe L. Doe", sid: "000045230879", in: "06/20/2026", out: "06/25/2026" },
   { id: "A2", status: "Reserved", guest: "John L. Doe", sid: "000045230642", in: "06/20/2026", out: "06/25/2026" },
@@ -37,7 +36,6 @@ export default function FloorCatalogClient({ floorId, floorTitle }: { floorId: s
   const [rooms, setRooms] = useState<Room[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  // NEW STATE: Tracks which room is being viewed in detail
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
 
   useEffect(() => {
@@ -50,11 +48,9 @@ export default function FloorCatalogClient({ floorId, floorTitle }: { floorId: s
     fetchRooms();
   }, [floorId]);
 
-  // --- RENDER VIEW 1: ROOM DETAILS TABLE ---
   if (selectedRoom) {
     return (
       <div className="p-10 bg-white min-h-screen font-sans">
-        {/* BREADCRUMBS */}
         <div className="flex items-center gap-2 text-[#1e3a5f] mb-6 text-xl">
           <button 
             onClick={() => setSelectedRoom(null)} 
@@ -68,7 +64,6 @@ export default function FloorCatalogClient({ floorId, floorTitle }: { floorId: s
           <span className="font-semibold text-[#1e3a5f]">View Details</span>
         </div>
 
-        {/* HERO BANNER */}
         <div className="relative h-64 rounded-[40px] overflow-hidden mb-8 shadow-lg">
           <Image src="/room-placeholder.jpg" alt="Room View" fill className="object-cover" />
           <div className="absolute inset-0 bg-black/30" />
@@ -83,14 +78,12 @@ export default function FloorCatalogClient({ floorId, floorTitle }: { floorId: s
           </div>
         </div>
 
-        {/* TAB NAVIGATION */}
         <div className="flex gap-4 mb-8">
           <button className="bg-[#3498db] text-white px-6 py-2 rounded-full font-bold shadow-md">Bed Status</button>
           <button className="bg-gray-100 text-gray-400 px-6 py-2 rounded-full font-bold hover:bg-gray-200 transition">Maintenance Status</button>
           <button className="bg-gray-100 text-gray-400 px-6 py-2 rounded-full font-bold hover:bg-gray-200 transition">Booking History</button>
         </div>
 
-        {/* DATA TABLE */}
         <div className="border border-gray-100 rounded-[30px] overflow-hidden shadow-sm">
           <table className="w-full text-left border-collapse">
             <thead className="bg-gray-50/50 border-b border-gray-100">
@@ -138,33 +131,26 @@ export default function FloorCatalogClient({ floorId, floorTitle }: { floorId: s
     );
   }
 
-  // --- RENDER VIEW 2: NORMAL GRID ---
   const filteredRooms = rooms.filter(room => 
     room.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <div className="p-10 bg-white min-h-screen font-sans">
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
-        <div className="flex items-baseline gap-4">
-          <h1 className="text-[#1e3a5f] font-bold text-5xl tracking-tight">Floor Catalog</h1>
-          <span className="text-[#3282B8] text-3xl font-medium">{floorTitle}</span>
+      {/* Search and Filter Row */}
+      <div className="flex items-center justify-end mb-10 gap-4">
+        <div className="relative w-80">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+          <Input 
+            placeholder="Search rooms..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-12 bg-gray-50 border-none h-12 rounded-xl text-base"
+          />
         </div>
-        
-        <div className="flex items-center gap-4">
-          <div className="relative w-80">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-            <Input 
-              placeholder="Search rooms..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-12 bg-gray-50 border-none h-12 rounded-xl text-base"
-            />
-          </div>
-          <button className="p-3 bg-gray-100 rounded-xl text-gray-400">
-            <LayoutGrid size={24} />
-          </button>
-        </div>
+        <button className="p-3 bg-gray-100 rounded-xl text-gray-400">
+          <LayoutGrid size={24} />
+        </button>
       </div>
 
       <div className="flex gap-4 mb-10">
@@ -190,7 +176,6 @@ export default function FloorCatalogClient({ floorId, floorTitle }: { floorId: s
   );
 }
 
-// --- SUB-COMPONENTS ---
 function StatItem({ label, value }: { label: string; value: number }) {
   return (
     <div className="bg-white px-5 py-2 rounded-lg border border-gray-100 shadow-sm flex gap-3 items-center">

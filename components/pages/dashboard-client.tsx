@@ -1,17 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Clock, User, Loader2, Bed, CalendarDays, Users, DoorOpen, ChevronRight, Ship, RotateCcw, Filter, Search } from "lucide-react";
-// REMOVED: NotificationBell import is no longer needed here
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetHeader, 
-  SheetTitle, 
-  SheetTrigger, 
-  SheetDescription,
-  SheetPortal
-} from "@/components/ui/sheet"; 
+import { Clock, User, Loader2, Bed, CalendarDays, Users, DoorOpen, Ship, RotateCcw, Filter } from "lucide-react";
+// Import your new component
+import GuestActivity from "@/components/pages/guest-activity";
 
 const mockData = {
   stats: { pending: 12, vacantBeds: 12, totalCrews: 80, totalRooms: 80, maintenance: 12 },
@@ -56,6 +48,7 @@ export default function DashboardClient() {
     </div>
   );
 
+  // Chart Logic Constants
   const chartWidth = 1000;
   const chartHeight = 250;
   const dataPointsY = [150, 120, 160, 180, 140, 120, 180, 160, 100]; 
@@ -73,21 +66,19 @@ export default function DashboardClient() {
   const tooltipData = activeIndex !== null ? getDynamicTooltipData(activeIndex) : null;
 
   return (
-    <div className="w-full animate-in fade-in duration-500">
+    <div className="w-full animate-in fade-in duration-500 pb-10">
       
-      {/* REMOVED: Header block that was pulling the bell up with -mt-[108px] */}
-
-      {/* Stats Grid */}
+      {/* Top Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 w-full">
-        <StatCard title="Vacant Beds" value={data.stats.vacantBeds} icon={<Bed size={22} />} colorKey="navy" />
-        <StatCard title="Pending Booking" value={data.stats.pending} icon={<CalendarDays size={22} />} colorKey="midBlue" />
-        <StatCard title="Total Crews" value={data.stats.totalCrews} icon={<Users size={22} />} colorKey="vibrantBlue" />
-        <StatCard title="Total Rooms" value={data.stats.totalRooms} icon={<DoorOpen size={22} />} colorKey="darkNavy" />
+        <StatCard title="Vacant Beds" value={data.stats.vacantBeds} icon={<Bed size={22} />} />
+        <StatCard title="Pending Booking" value={data.stats.pending} icon={<CalendarDays size={22} />} />
+        <StatCard title="Total Crews" value={data.stats.totalCrews} icon={<Users size={22} />} />
+        <StatCard title="Total Rooms" value={data.stats.totalRooms} icon={<DoorOpen size={22} />} />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 w-full items-start">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 w-full items-stretch">
+        {/* Left Column: Chart & Maintenance */}
         <div className="xl:col-span-8 space-y-8">
-          {/* Occupancy Chart */}
           <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100 relative overflow-hidden">
              <div className="flex justify-between items-center mb-6">
                <div>
@@ -127,12 +118,12 @@ export default function DashboardClient() {
                )}
 
                <svg className="w-full h-full pl-10 overflow-visible" viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="none">
-                  {[0, 50, 100, 150, 200, 250].map((y) => (
+                 {[0, 50, 100, 150, 200, 250].map((y) => (
                    <line key={y} x1="0" y1={y} x2={chartWidth} y2={y} stroke="#f1f5f9" strokeWidth="1" strokeDasharray="4 4" />
-                  ))}
-                  <path d="M800,100 L900,40 L1000,150 L1000,250 L800,250 Z" fill="#eef6ff" opacity="0.8" />
-                  <path d="M800,100 L900,40 L1000,150" fill="none" stroke="#3498db" strokeWidth="3" strokeDasharray="6 6" />
-                  <path 
+                 ))}
+                 <path d="M800,100 L900,40 L1000,150 L1000,250 L800,250 Z" fill="#eef6ff" opacity="0.8" />
+                 <path d="M800,100 L900,40 L1000,150" fill="none" stroke="#3498db" strokeWidth="3" strokeDasharray="6 6" />
+                 <path 
                     d="M0,150 L125,120 L250,160 L375,180 L500,140 L625,120 L750,180 L875,160 L1000,100" 
                     fill="none" stroke="#3498db" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" 
                   />
@@ -182,106 +173,25 @@ export default function DashboardClient() {
           </div>
         </div>
 
-        {/* Activity Section */}
-        <div className="xl:col-span-4 bg-white rounded-[32px] p-8 shadow-sm border border-blue-50/50 flex flex-col self-stretch h-full min-h-[600px]">
-          <div className="flex justify-between items-center mb-8 shrink-0">
-            <h3 className="text-xl font-bold text-[#2c4e7a]">Guest Arrival & Departure</h3>
-            <Sheet>
-              <SheetTrigger asChild>
-                <button className="text-[13px] font-bold text-[#3498db] hover:underline cursor-pointer">See all</button>
-              </SheetTrigger>
-              <SheetPortal>
-                <SheetContent 
-                  side="right" 
-                  className="w-full sm:max-w-[500px] bg-white border-none rounded-l-[40px] p-0 shadow-2xl"
-                >
-                  <div className="h-full flex flex-col p-10">
-                    <SheetHeader className="mb-10">
-                      <SheetTitle className="text-[32px] font-bold text-[#1e3a5f]">Guest Activity</SheetTitle>
-                      <SheetDescription className="sr-only">Detailed guest logs.</SheetDescription>
-                    </SheetHeader>
-                    
-                    <div className="flex-1 overflow-y-auto space-y-8 pr-2 custom-scrollbar">
-                      <div className="relative">
-                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                         <input type="text" placeholder="Search guests, rooms, vessels..." className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-100 transition-all" />
-                      </div>
-                      <GuestList title="Check-in Today" list={data.checkins} limit={20} />
-                      <GuestList title="Check-out Today" list={data.checkouts} limit={20} />
-                    </div>
-                  </div>
-                </SheetContent>
-              </SheetPortal>
-            </Sheet>
-          </div>
-
-          <div className="space-y-8 overflow-y-auto flex-1 pr-1 custom-scrollbar">
-            <GuestList title="Check-in Today" list={data.checkins} />
-            <GuestList title="Check-out Today" list={data.checkouts} />
-          </div>
-        </div>
+        {/* Right Column: Using the new GuestActivity component */}
+        <GuestActivity 
+          checkins={data.checkins} 
+          checkouts={data.checkouts} 
+        />
       </div>
     </div>
   );
 }
 
-// Sub-components...
-const GuestList = ({ title, list, limit = 5 }: { title: string, list: any[], limit?: number }) => {
-  const displayList = list.slice(0, limit);
-  return (
-    <div className="space-y-4">
-      <h4 className="text-[14px] font-bold text-[#5a7184] px-1">{title} ({list.length})</h4>
-      <div className="border border-blue-50 rounded-[24px] overflow-hidden bg-white">
-        {displayList.length > 0 ? (
-          displayList.map((item: any, i: number) => (
-            <GuestItem key={i} item={item} isLast={i === displayList.length - 1} />
-          ))
-        ) : (
-          <div className="py-10 text-center text-[12px] text-slate-400 italic font-medium">No activity for today</div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-const GuestItem = ({ item, isLast }: any) => (
-  <div className={`flex items-center justify-between py-4 px-5 hover:bg-slate-50 group cursor-pointer transition-all ${!isLast ? 'border-b border-blue-50/50' : ''}`}>
-    <div className="flex items-center gap-4 min-w-0">
-      <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center border border-slate-50 overflow-hidden shrink-0 group-hover:scale-110 transition-transform">
-        <User size={24} className="text-slate-400 translate-y-1" />
-      </div>
-      <div className="min-w-0">
-        <p className="font-bold text-[#1e3a5f] text-[14px] leading-tight mb-1 truncate">{item.name}</p>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-bold">
-          <span className="text-[#3498db]">{item.room}</span>
-          <span className="flex items-center gap-1 text-slate-400 font-semibold">
-            <Clock size={12} className="text-slate-300" /> {item.time}
-          </span>
-          <span className="flex items-center gap-1 text-[#3498db] font-semibold truncate max-w-[120px]">
-            <Ship size={12} className="opacity-70 shrink-0" /> {item.vessel}
-          </span>
-        </div>
-      </div>
-    </div>
-    <ChevronRight size={16} className="text-slate-300 group-hover:text-blue-400 group-hover:translate-x-1 transition-all shrink-0" />
-  </div>
-);
-
-const StatCard = ({ title, value, colorKey, icon }: { title: string, value: number, colorKey: string, icon: React.ReactNode }) => {
-  const gradientStyles: Record<string, string> = {
-    navy: "linear-gradient(135deg, #1e3a5f 0%, #2c4e7a 100%)",
-    midBlue: "linear-gradient(135deg, #2b5a8e 0%, #4682b4 100%)",
-    vibrantBlue: "linear-gradient(135deg, #3498db 0%, #5dade2 100%)",
-    darkNavy: "linear-gradient(135deg, #1a2e44 0%, #2c3e50 100%)"
-  };
-
+// Reusable StatCard Component
+const StatCard = ({ title, value, icon }: { title: string, value: number, icon: React.ReactNode }) => {
   return (
     <div 
-      style={{ background: gradientStyles[colorKey] }}
+      style={{ background: "linear-gradient(135deg, #14547F 0%, #1C76B2 35%, #2087CB 70%, #2497E5 100%)" }}
       className="p-7 rounded-[32px] shadow-xl text-white flex flex-col h-[200px] transition-all hover:scale-[1.02] hover:shadow-2xl relative overflow-hidden group"
     >
       <div className="flex justify-between items-start mb-2 relative z-10">
-        <h4 className="uppercase text-[11px] font-extrabold tracking-[0.15em] opacity-70 leading-tight">{title}</h4>
+        <h4 className="uppercase text-[11px] font-extrabold tracking-[0.15em] opacity-80 leading-tight">{title}</h4>
         <div className="opacity-30 group-hover:opacity-60 transition-opacity">{icon}</div>
       </div>
       <div className="text-[72px] font-bold leading-none mb-auto relative z-10 tracking-tighter">{value}</div>
@@ -290,7 +200,7 @@ const StatCard = ({ title, value, colorKey, icon }: { title: string, value: numb
            <span className="text-[12px] font-bold">13</span>
            <span className="text-[8px] ml-1.5 opacity-60">▣</span>
         </div>
-        <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">Increased from last month</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest opacity-70">Increased from last month</span>
       </div>
       <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-all" />
     </div>
