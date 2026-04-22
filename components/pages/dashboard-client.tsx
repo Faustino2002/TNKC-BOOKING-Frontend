@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Clock, User, Loader2, Bed, CalendarDays, Users, DoorOpen, ChevronRight, Ship, RotateCcw, Filter, Search } from "lucide-react";
-import { NotificationBell } from "./notification-bell";
+// REMOVED: NotificationBell import is no longer needed here
 import { 
   Sheet, 
   SheetContent, 
@@ -75,12 +75,7 @@ export default function DashboardClient() {
   return (
     <div className="w-full animate-in fade-in duration-500">
       
-      <header className="flex items-center justify-end w-full mb-10 -mt-[108px] relative z-40">
-        {/* -mt-[108px] pulls the bell up into the layout's header line */}
-        <div className="scale-125 hover:bg-white p-2 rounded-xl transition-all shadow-sm md:shadow-none hover:shadow-md border border-transparent hover:border-slate-100">
-          <NotificationBell />
-        </div>
-      </header>
+      {/* REMOVED: Header block that was pulling the bell up with -mt-[108px] */}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 w-full">

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { usePathname } from "next/navigation";
-import SubNavItem from "./SubNavItem"; // Updated to match the new name
+import SubNavItem from "./SubNavItem";
 
 interface DropdownNavItemProps {
   item: {
@@ -22,17 +22,17 @@ export default function DropdownNavItem({ item }: DropdownNavItemProps) {
     <div className="space-y-1">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors group/btn"
+        className="w-full flex items-center justify-between px-3 py-2 text-gray-400 hover:bg-white/5 hover:text-white rounded-xl transition-all group/btn"
       >
         <div className="flex items-center gap-3">
           <Icon size={22} className="shrink-0" />
-          <span className="text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+          <span className="text-sm font-medium hidden group-hover:block opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
             {item.label}
           </span>
         </div>
         <ChevronDown 
           size={16} 
-          className={`transition-transform duration-200 opacity-0 group-hover:opacity-100 ${isOpen ? "rotate-180" : ""}`} 
+          className={`transition-transform duration-200 hidden group-hover:block opacity-0 group-hover:opacity-100 ${isOpen ? "rotate-180" : ""}`} 
         />
       </button>
 
@@ -43,7 +43,7 @@ export default function DropdownNavItem({ item }: DropdownNavItemProps) {
               key={child.href}
               label={child.label}
               href={child.href}
-              isActive={pathname === child.href} // Task 4: Active route detection
+              isActive={pathname === child.href}
             />
           ))}
         </div>

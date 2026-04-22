@@ -17,7 +17,7 @@ export const homeRoutes = [
       { label: "Booking List", href: "/home/booking-list", icon: CalendarCheck },
       { 
         label: "Floor Catalog", 
-        href: "/home/floor-catalog", // Added base href for parent matching
+        href: "/home/floor-catalog", 
         icon: BookOpen,
         children: [
           { label: "1st Floor", href: "/home/floor-catalog/floor1" },
@@ -32,18 +32,18 @@ export const homeRoutes = [
       { 
         label: "Home", 
         href: "/home/user-dashboard", 
-        icon: LayoutDashboard,
-        // Moved Reservation here so breadcrumbs show it as a sub-page
-        children: [
-          { label: "Reservation", href: "/home/user-dashboard/reservation" }
-        ]
+        icon: LayoutDashboard 
+      },
+      { 
+        label: "Reservation", 
+        href: "/home/user-dashboard/reservation", 
+        icon: CalendarCheck 
       },
     ]
   },
   {
     section: "General",
     items: [
-      // If these are global, keeping them flat is fine
       { label: "Settings", href: "/home/settings", icon: Settings },
       { label: "Support", href: "/home/support", icon: LifeBuoy },
     ]

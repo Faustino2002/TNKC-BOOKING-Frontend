@@ -12,13 +12,13 @@ import {
   ExternalLink,
   Bell
 } from "lucide-react";
-// Import the drawer component you created
+// Import Link for navigation
+import Link from "next/link";
 import { UserReminderDrawer } from "@/components/pages/user-reminder-drawer";
 
 export default function UserDashboardClient() {
   const [userName, setUserName] = useState("John Doe");
   const [date, setDate] = useState<Date | undefined>(new Date());
-  // Added state to control the reminders drawer
   const [isReminderOpen, setIsReminderOpen] = useState(false);
 
   useEffect(() => {
@@ -27,7 +27,6 @@ export default function UserDashboardClient() {
   }, []);
 
   return (
-    /* Main wrapper: Ensure w-full and min-h-screen to prevent layout collapse */
     <div className="w-full min-h-screen">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-10">
         
@@ -43,10 +42,14 @@ export default function UserDashboardClient() {
             />
             <div className="absolute inset-0 bg-black/30 flex flex-col justify-center px-10 text-white">
               <h1 className="text-4xl font-bold mb-4">Good morning, {userName}</h1>
-              <Button className="w-fit bg-[#3282B8] hover:bg-[#2c71a0] rounded-full px-6 flex gap-2">
-                <PlusCircle size={18} />
-                Add booking
-              </Button>
+              
+              {/* UPDATED: Link added to navigate to your new page */}
+              <Link href="/home/user-dashboard/reservation">
+                <Button className="w-fit bg-[#3282B8] hover:bg-[#2c71a0] rounded-full px-6 flex gap-2">
+                  <PlusCircle size={18} />
+                  Add booking
+                </Button>
+              </Link>
             </div>
           </div>
 
@@ -97,8 +100,6 @@ export default function UserDashboardClient() {
 
         {/* RIGHT COLUMN (4 Units) */}
         <div className="lg:col-span-4 flex flex-col gap-6">
-          
-          {/* 4. Mini Calendar */}
           <Card className="rounded-3xl border-none shadow-sm p-4 flex flex-col items-center justify-center shrink-0">
             <Calendar
               mode="single"
@@ -128,11 +129,9 @@ export default function UserDashboardClient() {
             />
           </Card>
 
-          {/* 5. Reminders Section */}
           <Card className="rounded-3xl border-none shadow-sm overflow-hidden flex flex-col flex-grow">
             <div className="bg-white p-4 flex justify-between items-center border-b border-slate-50 shrink-0">
               <h2 className="font-bold text-slate-800">Reminders</h2>
-              {/* Added onClick to trigger the drawer */}
               <span 
                 onClick={() => setIsReminderOpen(true)}
                 className="text-[#3282B8] text-xs font-bold cursor-pointer hover:underline"
@@ -140,7 +139,6 @@ export default function UserDashboardClient() {
                 See all
               </span>
             </div>
-            
             <div className="p-4 space-y-4 flex-grow">
               {[
                 { color: 'bg-red-500', label: 'High' },
@@ -163,7 +161,6 @@ export default function UserDashboardClient() {
         </div>
       </div>
 
-      {/* RENDER DRAWER OUTSIDE GRID FLOW */}
       <UserReminderDrawer 
         isOpen={isReminderOpen} 
         onClose={() => setIsReminderOpen(false)} 
