@@ -53,7 +53,7 @@ export default function GuestListClient() {
     } finally {
       setIsLoading(false);
     }
-  }, [searchQuery]);
+  }, []);
 
   useEffect(() => {
     fetchGuests();
@@ -66,10 +66,6 @@ export default function GuestListClient() {
 
   return (
     <div className="w-full animate-in fade-in duration-500">
-      {/* CLEAN HEADER: 
-          Removed the <h1> because the Layout now provides the giant background title.
-          Removed min-h-screen to prevent unnecessary scrolling.
-      */}
       <header className="flex flex-col sm:flex-row justify-between items-end gap-6 mb-10 w-full">
         <div>
           <p className="text-[#5a7184] text-xl font-semibold tracking-tight">
@@ -82,14 +78,15 @@ export default function GuestListClient() {
         </button>
       </header>
 
-      {/* Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-8 w-full bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-        <div className="flex items-center gap-3 flex-1 min-w-[300px]">
+      {/* Toolbar Section */}
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-8 w-full">
+        {/* Search & Filter Group - White background only applied here */}
+        <div className="flex items-center gap-3 bg-white p-4 rounded-2xl shadow-sm border border-gray-100 w-fit">
           <button className="p-2.5 bg-white border border-gray-200 rounded-xl shadow-sm hover:bg-gray-50 transition-colors text-gray-500">
             <Filter size={20} />
           </button>
           
-          <div className="relative flex-1 max-w-md"> 
+          <div className="relative w-80"> 
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input 
               type="text" 
@@ -101,6 +98,7 @@ export default function GuestListClient() {
           </div>
         </div>
         
+        {/* Total Guests - Left alone outside the white box */}
         <div className="flex items-center gap-2 text-sm text-[#5a7184] font-semibold">
           <span>Total Guests:</span>
           <span className="bg-blue-50 text-[#3498db] px-3 py-1 rounded-lg">{guestData.length}</span>

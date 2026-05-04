@@ -32,26 +32,32 @@ export function AuthContent() {
       return; 
     }
 
-    if (username === "admin" && password === "1234") {
-      // ADMIN FLOW
+    // 1. ADMIN FLOW
+    if (username === "admin" && password === "admin123") {
       setLoginError(false);
       setFailedAttempts(0);
+      localStorage.setItem("userFullName", "System Admin");
+      localStorage.setItem("userRole", "Admin");
+      localStorage.setItem("userEmail", "admin@tnkchouse.com");
+      router.push("/home/dashboard"); 
 
-      // --- ADDED: PERSIST ADMIN DATA ---
+    // 2. FRONTDESK FLOW (NEW)
+    } else if (username === "frontdesk" && password === "front123") {
+      setLoginError(false);
+      setFailedAttempts(0);
       localStorage.setItem("userFullName", "Klare Marasigan");
       localStorage.setItem("userRole", "Frontdesk");
-      
-      router.push("/home/dashboard"); 
-      
+      localStorage.setItem("userEmail", "klare.frontdesk@tnkchouse.com");
+      // Route to the new Frontdesk specific path
+      router.push("/home/frontdesk-dashboard"); 
+
+    // 3. USER/GUEST FLOW
     } else if (username === "user" && password === "user123") {
-      // USER FLOW
       setLoginError(false);
       setFailedAttempts(0);
-
-      // --- ADDED: PERSIST USER DATA ---
       localStorage.setItem("userFullName", "Randolph Faustino");
       localStorage.setItem("userRole", "Guest");
-
+      localStorage.setItem("userEmail", "randolph.f@gmail.com");
       router.push("/home/user-dashboard"); 
       
     } else {
@@ -60,7 +66,7 @@ export function AuthContent() {
     }
   };
 
-  // ... (Rest of your handleResetLink and JSX remains exactly the same)
+  // ... (Reset Link logic remains identical)
   const handleResetLink = () => {
     const emailTrimmed = email.trim();
     if (emailTrimmed === "") { setEmailError(true); setEmailInvalid(false); return; }

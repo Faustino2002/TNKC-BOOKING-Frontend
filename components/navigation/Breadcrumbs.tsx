@@ -10,7 +10,6 @@ export default function Breadcrumbs() {
   const pathname = usePathname();
   const [userName, setUserName] = useState("");
 
-  // Grab the name from storage when the component mounts
   useEffect(() => {
     const storedName = localStorage.getItem("userFullName");
     if (storedName) setUserName(storedName);
@@ -18,8 +17,6 @@ export default function Breadcrumbs() {
 
   const getBreadcrumbs = () => {
     const crumbs: { label: string; href: string }[] = [];
-    
-    // Always start with Home
     crumbs.push({ label: "Home", href: "/home" });
 
     homeRoutes.forEach((section) => {
@@ -49,18 +46,22 @@ export default function Breadcrumbs() {
   if (pathname === "/home" || breadcrumbs.length === 0) return null;
 
   return (
-    <div className="flex items-center gap-2"> {/* Restored original flex feel */}
+    // Changed to text-[15px] - slightly smaller than default but bigger than text-sm
+    <div className="flex items-center gap-2 text-[15px] font-medium tracking-tight"> 
       {breadcrumbs.map((crumb, index) => (
         <React.Fragment key={crumb.href}>
-          {index > 0 && <ChevronRight size={14} className="text-gray-400" />}
+          {index > 0 && <ChevronRight size={16} className="text-gray-300 mx-0.5" />}
           
-          <span>
+          <span className="flex items-center">
             {index === breadcrumbs.length - 1 ? (
-              // Active page - Restored to your original span style
-              <span>{crumb.label}</span>
+              // Active page - Using a soft slate color
+              <span className="text-slate-500 font-semibold">{crumb.label}</span>
             ) : (
-              // Clickable parents - Standard link style
-              <Link href={crumb.href} className="text-blue-500 hover:underline">
+              // Clickable parents
+              <Link 
+                href={crumb.href} 
+                className="text-blue-500 hover:text-blue-600 transition-colors"
+              >
                 {crumb.label}
               </Link>
             )}

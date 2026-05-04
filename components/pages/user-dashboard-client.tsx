@@ -12,19 +12,33 @@ import {
   ExternalLink,
   Bell
 } from "lucide-react";
-// Import Link for navigation
-import Link from "next/link";
+
+// 1. IMPORT: Added the component from your specific path
+import AddBookingUser from "@/components/pages/add-booking-user";
 import { UserReminderDrawer } from "@/components/pages/user-reminder-drawer";
 
 export default function UserDashboardClient() {
   const [userName, setUserName] = useState("John Doe");
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [isReminderOpen, setIsReminderOpen] = useState(false);
+  
+  // 2. STATE: Added toggle to switch between Dashboard and Booking page
+  const [showBookingForm, setShowBookingForm] = useState(false);
 
   useEffect(() => {
     const name = localStorage.getItem("userFullName");
     if (name) setUserName(name);
   }, []);
+
+  // 3. CONDITIONAL RENDER: If showBookingForm is true, show the component instead
+  if (showBookingForm) {
+    return (
+      <AddBookingUser 
+        onCancel={() => setShowBookingForm(false)} 
+        onBack={() => setShowBookingForm(false)} 
+      />
+    );
+  }
 
   return (
     <div className="w-full min-h-screen">
@@ -43,13 +57,14 @@ export default function UserDashboardClient() {
             <div className="absolute inset-0 bg-black/30 flex flex-col justify-center px-10 text-white">
               <h1 className="text-4xl font-bold mb-4">Good morning, {userName}</h1>
               
-              {/* UPDATED: Link added to navigate to your new page */}
-              <Link href="/home/user-dashboard/reservation">
-                <Button className="w-fit bg-[#3282B8] hover:bg-[#2c71a0] rounded-full px-6 flex gap-2">
-                  <PlusCircle size={18} />
-                  Add booking
-                </Button>
-              </Link>
+              {/* 4. UPDATE: Removed <Link> and added onClick to trigger the state */}
+              <Button 
+                onClick={() => setShowBookingForm(true)}
+                className="w-fit bg-[#3282B8] hover:bg-[#2c71a0] rounded-full px-6 flex gap-2 transition-transform active:scale-95"
+              >
+                <PlusCircle size={18} />
+                Add booking
+              </Button>
             </div>
           </div>
 

@@ -10,7 +10,7 @@ import {
 
 export const homeRoutes = [
   {
-    section: "Menu",
+    section: "Menu", // Admin Section
     items: [
       { label: "Dashboard", href: "/home/dashboard", icon: LayoutDashboard },
       { label: "Guestlist", href: "/home/guest-list", icon: Users },
@@ -27,7 +27,14 @@ export const homeRoutes = [
     ]
   },
   {
-    section: "User Menu",
+    section: "Frontdesk Menu", // New Frontdesk Section
+    items: [
+      { label: "Dashboard", href: "/home/frontdesk-dashboard", icon: LayoutDashboard },
+      { label: "Guestlist", href: "/home/frontdesk-guestlist", icon: Users },
+    ]
+  },
+  {
+    section: "User Menu", // Guest Section
     items: [
       { 
         label: "Home", 
@@ -44,7 +51,7 @@ export const homeRoutes = [
   {
     section: "General",
     items: [
-      { label: "Settings", href: "/home/settings", icon: Settings },
+      { label: "Setting", href: "/home/settings", icon: Settings }, // Updated label from 'Settings'
       { label: "Support", href: "/home/support", icon: LifeBuoy },
     ]
   }

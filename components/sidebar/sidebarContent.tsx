@@ -7,12 +7,19 @@ import DropdownNavItem from "@/components/sidebar/DropdownNavItem";
 
 export default function SidebarContent() {
   const pathname = usePathname();
+  
+  // Detection logic for the three main account sections
   const isUserSection = pathname.startsWith("/home/user-dashboard");
+  const isFrontdeskSection = pathname.startsWith("/home/frontdesk-dashboard");
 
   const filteredRoutes = homeRoutes.filter((section) => {
+    if (isFrontdeskSection) {
+      return section.section === "Frontdesk Menu" || section.section === "General";
+    }
     if (isUserSection) {
       return section.section === "User Menu" || section.section === "General";
     }
+    // Default fallback for Admin
     return section.section === "Menu" || section.section === "General";
   });
 
@@ -23,12 +30,16 @@ export default function SidebarContent() {
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4 px-2">
             <span className="group-hover:hidden block text-center">...</span>
             <span className="hidden group-hover:block">
-              {section.section === "User Menu" ? "Menu" : section.section}
+              {/* Display "Menu" for specific dashboard roles, otherwise use the section name */}
+              {["User Menu", "Frontdesk Menu"].includes(section.section) 
+                ? "Menu" 
+                : section.section}
             </span>
           </p>
           <div className="space-y-2">
             {section.items.map((item) => {
-              const isActive = item.href === "/home/user-dashboard" 
+              // Ensure Dashboard/Home links are only active on the exact path
+              const isActive = (item.href === "/home/user-dashboard" || item.href === "/home/frontdesk-dashboard")
                 ? pathname === item.href 
                 : pathname === item.href || pathname.startsWith(item.href + "/");
 

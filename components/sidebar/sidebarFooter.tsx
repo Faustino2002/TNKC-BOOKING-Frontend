@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation"; // Added for modern navigation
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +12,7 @@ import {
 import { User, Bell, LogOut, MoreVertical } from "lucide-react";
 
 export default function SidebarFooter() {
+  const router = useRouter();
   const [userData, setUserData] = useState({ name: "User", role: "", email: "user@example.com" });
 
   useEffect(() => {
@@ -19,6 +21,24 @@ export default function SidebarFooter() {
     const storedEmail = localStorage.getItem("userEmail") || "john.doe@gmail.com"; 
     setUserData({ name: storedName, role: storedRole, email: storedEmail });
   }, []);
+
+  // BACKEND READY LOGOUT HANDLER
+  const handleLogout = async () => {
+    try {
+      // 1. OPTIONAL: Call your backend logout endpoint here
+      // await fetch('/api/auth/logout', { method: 'POST' });
+
+      // 2. Clear local session data
+      localStorage.clear();
+      
+        
+      router.push("/"); 
+    } catch (error) {
+      console.error("Logout failed:", error);
+      // Fallback redirect
+      window.location.href = "/";
+    }
+  };
 
   const getInitials = (name: string) => {
     return name.split(" ").map((n) => n[0]).join("").toUpperCase().substring(0, 2);
@@ -75,8 +95,8 @@ export default function SidebarFooter() {
           <DropdownMenuSeparator className="bg-slate-800 mx-2" />
           <div className="p-1">
             <DropdownMenuItem 
-              className="flex items-center gap-3 p-3 cursor-pointer text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition-colors"
-              onClick={() => { localStorage.clear(); window.location.href = "/login"; }}
+              className="flex items-center gap-3 p-3 cursor-pointer text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors"
+              onClick={handleLogout}
             >
               <LogOut size={18} />
               <span className="text-sm font-medium">Log out</span>

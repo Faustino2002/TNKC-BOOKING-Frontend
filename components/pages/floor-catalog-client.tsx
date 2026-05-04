@@ -137,20 +137,26 @@ export default function FloorCatalogClient({ floorId, floorTitle }: { floorId: s
 
   return (
     <div className="p-10 bg-white min-h-screen font-sans">
-      {/* Search and Filter Row */}
-      <div className="flex items-center justify-end mb-10 gap-4">
-        <div className="relative w-80">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-          <Input 
-            placeholder="Search rooms..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-12 bg-gray-50 border-none h-12 rounded-xl text-base"
-          />
+      {/* Search and Filter Row - Updated with Header */}
+      <div className="flex items-center justify-between mb-10 gap-4">
+        <h1 className="text-4xl font-bold text-[#1e3a5f] tracking-tight">
+          {floorTitle}
+        </h1>
+
+        <div className="flex items-center gap-4">
+          <div className="relative w-80">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+            <Input 
+              placeholder="Search rooms..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-12 bg-gray-50 border-none h-12 rounded-xl text-base"
+            />
+          </div>
+          <button className="p-3 bg-gray-100 rounded-xl text-gray-400 hover:bg-gray-200 transition-colors">
+            <LayoutGrid size={24} />
+          </button>
         </div>
-        <button className="p-3 bg-gray-100 rounded-xl text-gray-400">
-          <LayoutGrid size={24} />
-        </button>
       </div>
 
       <div className="flex gap-4 mb-10">
@@ -209,4 +215,4 @@ function RoomCard({ room }: { room: Room }) {
       </div>
     </div>
   );
-}
+}                                         
