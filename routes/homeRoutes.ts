@@ -27,10 +27,15 @@ export const homeRoutes = [
     ]
   },
   {
-    section: "Frontdesk Menu", // New Frontdesk Section
+    section: "Frontdesk Menu", 
     items: [
       { label: "Dashboard", href: "/home/frontdesk-dashboard", icon: LayoutDashboard },
-      { label: "Guestlist", href: "/home/frontdesk-guestlist", icon: Users },
+      { 
+        label: "Guestlist", 
+        // CHANGED: Updated to match your new directory structure
+        href: "/home/frontdesk-dashboard/frontdesk-guestlist", 
+        icon: Users 
+      },
     ]
   },
   {
@@ -51,7 +56,7 @@ export const homeRoutes = [
   {
     section: "General",
     items: [
-      { label: "Setting", href: "/home/settings", icon: Settings }, // Updated label from 'Settings'
+      { label: "Setting", href: "/home/settings", icon: Settings },
       { label: "Support", href: "/home/support", icon: LifeBuoy },
     ]
   }

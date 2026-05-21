@@ -1,289 +1,467 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { ChevronLeft, ChevronRight, Plus, Bell, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, Loader2, X, AlertCircle, CalendarRange, History } from "lucide-react";
 
-// --- TYPES ---
-type BookingType = "approved" | "requested" | "maintenance";
+// Clean modular component view imports
+import FrontdeskDayView from "./Frontdesk-DayView";
+import FrontdeskWeeklyView from "./Frontdesk-WeeklyView";
+import FrontdeskMonthlyView from "./Frontdesk-MonthlyView";
+import FrontdeskHistoryView from "./Frontdesk-HistoryView"; // Import separated history view component
+import FrontdeskNotification from "./frontdesk-notification"; 
 
-interface Booking {
-  id: string;
-  name: string;
-  date: number;   
-  start: number; 
-  end: number;   
-  type: BookingType;
-  isCheckIn?: boolean;
-  isCheckOut?: boolean;
+// Shared configuration types
+import { RoomData, WeekDay, Booking, HOURS } from "./frontdesk-types";
+
+interface ConfirmationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  guestName: string;
+  actionType: "check-in" | "check-out";
 }
 
-interface RoomData {
-  room: string;
-  type: string;
-  bookings: Booking[];
+function ConfirmationModal({ isOpen, onClose, onConfirm, guestName, actionType }: ConfirmationModalProps) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs animate-fade-in">
+      <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-5 border border-slate-100 relative">
+        <button 
+          onClick={onClose}
+          className="absolute right-4 top-4 p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors"
+        >
+          <X size={16} />
+        </button>
+        
+        <div className="flex gap-4 items-start mt-2">
+          <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-lg">
+            <AlertCircle size={20} />
+          </div>
+          <div className="space-y-1.5 flex-1">
+            <h3 className="text-base font-bold text-slate-800 capitalize">
+              Confirm {actionType}
+            </h3>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Are you sure you want to confirm {guestName}’s {actionType} time?
+            </p>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 mt-6">
+          <button 
+            onClick={onClose}
+            className="px-4 py-2 border border-slate-200 text-slate-700 text-xs font-semibold rounded-lg hover:bg-slate-50 transition-colors"
+          >
+            Cancel
+          </button>
+          <button 
+            onClick={onConfirm}
+            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition-colors shadow-xs"
+          >
+            Continue
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
-// --- UTILS ---
-const getBookingStyles = (type: BookingType) => {
-  switch (type) {
-    case "approved": return "bg-[#1e3a8a] text-white border-none";
-    case "requested": return "bg-[#fee2e2] text-slate-700 border border-red-200";
-    case "maintenance": return "bg-[#f39c12] text-white border-none";
-    default: return "bg-slate-200 text-slate-700";
-  }
-};
+interface ApprovedStayModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  booking: Booking | null;
+  roomNumber: string;
+  roomType: string;
+}
 
-const HOURS = Array.from({ length: 24 }, (_, i) => {
-  const hour = i % 12 || 12;
-  return `${hour}${i < 12 ? "AM" : "PM"}`;
-});
+function ApprovedStayModal({ isOpen, onClose, booking, roomNumber, roomType }: ApprovedStayModalProps) {
+  if (!isOpen || !booking) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs animate-fade-in">
+      <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-5 border border-slate-100 relative">
+        <button 
+          onClick={onClose}
+          className="absolute right-4 top-4 p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors"
+        >
+          <X size={16} />
+        </button>
+        
+        <div className="flex gap-4 items-start mt-2">
+          <div className="p-2.5 bg-blue-50 text-[#1e3a8a] rounded-lg">
+            <CalendarRange size={20} />
+          </div>
+          <div className="space-y-1.5 flex-1">
+            <h3 className="text-base font-bold text-slate-800">
+              Approved Stay Action
+            </h3>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Managing current selection details for <strong>{booking.name}</strong>.
+            </p>
+            <div className="mt-2 p-2.5 bg-slate-50 border border-slate-100 rounded-lg text-[11px] text-slate-600 space-y-1">
+              <p><strong>Assigned:</strong> Room {roomNumber} ({roomType})</p>
+              <p><strong>Timeline:</strong> {HOURS[booking.start]} – {HOURS[booking.end]}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 mt-6">
+          <button 
+            onClick={onClose}
+            className="px-4 py-2 border border-slate-200 text-slate-700 text-xs font-semibold rounded-lg hover:bg-slate-50 transition-colors"
+          >
+            Cancel
+          </button>
+          <button 
+            onClick={() => {
+              onClose();
+            }}
+            className="px-4 py-2 bg-[#1e3a8a] hover:bg-[#1a337a] text-white text-xs font-semibold rounded-lg transition-colors shadow-xs"
+          >
+            Edit Stay
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function FrontdeskDashboardClient() {
-  const [view, setView] = useState<"Day" | "Week" | "Month">("Day");
+  const [view, setView] = useState<"Day" | "Week" | "Month" | "History">("Day");
+  const [rooms, setRooms] = useState<RoomData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Synchronized Date Reference
+  const [activeModal, setActiveModal] = useState<{
+    type: "check-in" | "check-out";
+    booking: Booking;
+    roomNumber: string;
+  } | null>(null);
+
+  const [approvedModal, setApprovedModal] = useState<{
+    booking: Booking;
+    roomNumber: string;
+    roomType: string;
+  } | null>(null);
+
   const today = useMemo(() => new Date(), []);
-  const currentDay = today.getDate();
+  const currentDayStr = today.toISOString().split('T')[0];
   const currentMonthYear = today.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
-  // Dynamically generated data to match the calendar "Today"
-  const dashboardData: Record<string, RoomData[]> = useMemo(() => ({
-    "TNKC Floor 2": [
-      { 
-        room: "202", 
-        type: "Single", 
-        bookings: [
-          { id: "1", name: "John Doe (In)", date: currentDay, start: 2, end: 10, type: "approved", isCheckIn: true },
-          { id: "4", name: "Alice Blue (Out)", date: currentDay, start: 16, end: 22, type: "approved", isCheckOut: true }
-        ] 
-      },
-      { 
-        room: "203", 
-        type: "Single", 
-        bookings: [
-          { id: "2", name: "Jane Smith (Req)", date: currentDay, start: 10, end: 15, type: "requested" }
-        ] 
-      },
-    ],
-    "TNKC Floor 3": [
-      { 
-        room: "303", 
-        type: "Single", 
-        bookings: [
-          { id: "3", name: "Maintenance", date: currentDay, start: 8, end: 14, type: "maintenance" }
-        ] 
-      },
-    ]
-  }), [currentDay]);
-
-  const weekDays = useMemo(() => {
+  const weekDays = useMemo<WeekDay[]>(() => {
     const startOfWeek = new Date(today);
     startOfWeek.setDate(today.getDate() - today.getDay());
     return Array.from({ length: 7 }, (_, i) => {
       const day = new Date(startOfWeek);
       day.setDate(startOfWeek.getDate() + i);
       return {
-        day: day.toLocaleDateString("en-US", { weekday: "long" }),
-        date: day.getDate(),
+        fullDate: day.toISOString().split('T')[0],
+        dayName: day.toLocaleDateString("en-US", { weekday: "short" }),
+        dateNum: day.getDate(),
       };
     });
   }, [today]);
 
+  const groupedData = useMemo(() => {
+    return rooms.reduce((acc, room) => {
+      if (!acc[room.floor]) acc[room.floor] = [];
+      acc[room.floor].push(room);
+      return acc;
+    }, {} as Record<string, RoomData[]>);
+  }, [rooms]);
+
+  const transformedNotifications = useMemo(() => {
+    return rooms.flatMap((room) => 
+      room.bookings
+        .filter((booking) => booking.date === currentDayStr)
+        .flatMap((booking) => {
+          const list: any[] = [];
+          
+          if (booking.type === "maintenance") {
+            list.push({
+              id: booking.id,
+              type: "maintenance",
+              description: `Room ${room.room} is marked under maintenance "Cleaning"`,
+              createdAt: new Date().toISOString(),
+              isUnread: true,
+              avatarUrl: null,
+              metadata: { roomId: room.room, bookingId: booking.id }
+            });
+            return list; 
+          }
+
+          if (booking.type === "requested") {
+            list.push({
+              id: `${booking.id}-req`,
+              type: "requested",
+              description: `Pending request from ${booking.name} for Room ${room.room}`,
+              createdAt: new Date().toISOString(),
+              isUnread: true,
+              avatarUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&q=80",
+              metadata: { roomId: room.room, bookingId: booking.id }
+            });
+          }
+          
+          if (booking.isCheckIn) {
+            list.push({
+              id: `${booking.id}-in`,
+              type: "checkin",
+              description: `Guest ${booking.name} is arriving today`,
+              createdAt: new Date().toISOString(),
+              isUnread: true,
+              avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80",
+              metadata: { roomId: room.room, bookingId: booking.id }
+            });
+          }
+          
+          if (booking.isCheckOut) {
+            list.push({
+              id: `${booking.id}-out`,
+              type: "checkout",
+              description: `Guest ${booking.name} is checking out today`,
+              createdAt: new Date().toISOString(),
+              isUnread: true,
+              avatarUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=100&q=80",
+              metadata: { roomId: room.room, bookingId: booking.id }
+            });
+          }
+          
+          return list;
+        })
+    );
+  }, [rooms, currentDayStr]);
+
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
+    const fetchData = async () => {
+      setIsLoading(true);
+      await new Promise(resolve => setTimeout(resolve, 600));
+
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+      const tomorrowDayStr = tomorrow.toISOString().split('T')[0];
+      
+      setRooms([
+        { 
+          room: "202", 
+          floor: "TNKC Floor 2", 
+          type: "Single", 
+          bookings: [
+            { 
+              id: "000000000001", 
+              name: "John L. Doe", 
+              date: currentDayStr, 
+              start: 5, 
+              end: 11, 
+              type: "approved", 
+              isCheckIn: true,
+              isCheckOut: false,
+              guestProfile: {
+                seamanId: "00000000445002",
+                rank: "Chief Cadet",
+                contactNumber: "0947181716689",
+                email: "john.doe@gmail.com"
+              }
+            },
+            {
+              id: "000000000004",
+              name: "Jane M. Smith",
+              date: tomorrowDayStr,
+              start: 12,
+              end: 18,
+              type: "requested",
+              isCheckIn: false,
+              isCheckOut: false,
+              guestProfile: {
+                seamanId: "00000000981123",
+                rank: "Third Officer",
+                contactNumber: "0915223344551",
+                email: "jane.smith@yahoo.com"
+              }
+            },
+            {
+              id: "000000000088",
+              name: "Past Guest Alpha",
+              date: "2026-04-15",
+              start: 8,
+              end: 16,
+              type: "approved",
+              isCheckIn: false,
+              isCheckOut: false
+            }
+          ] 
+        },
+        { 
+          room: "303", 
+          floor: "TNKC Floor 3", 
+          type: "Single", 
+          bookings: [
+            { 
+              id: "000000000003", 
+              name: "John L. Doe", 
+              date: currentDayStr, 
+              start: 8, 
+              end: 14, 
+              type: "maintenance" 
+            },
+            {
+              id: "000000000005",
+              name: "Bob A. Taylor",
+              date: currentDayStr,
+              start: 15,
+              end: 21,
+              type: "requested",
+              isCheckIn: false,
+              isCheckOut: false,
+              guestProfile: {
+                seamanId: "00000000774321",
+                rank: "Deck Cadet",
+                contactNumber: "0917888992233",
+                email: "bob.taylor@hotmail.com"
+              }
+            },
+            {
+              id: "000000000099",
+              name: "Past Guest Beta",
+              date: "2026-04-20",
+              start: 10,
+              end: 20,
+              type: "requested",
+              isCheckIn: false,
+              isCheckOut: false
+            }
+          ] 
+        },
+        {
+          room: "402",
+          floor: "TNKC Floor 4",
+          type: "Suite",
+          bookings: [
+            {
+              id: "000000000002",
+              name: "Marcus V. Aurelius",
+              date: currentDayStr,
+              start: 0,
+              end: 4,
+              type: "approved",
+              isCheckIn: false,
+              isCheckOut: true,
+              guestProfile: {
+                seamanId: "00000000112233",
+                rank: "Captain",
+                contactNumber: "0918999887766",
+                email: "marcus.aurelius@empire.com"
+              }
+            }
+          ]
+        }
+      ]);
+      setIsLoading(false);
+    };
+    fetchData();
+  }, [currentDayStr, today]);
+
+  const handleConfirmAction = () => {
+    if (!activeModal) return;
+    console.log(`Confirmed ${activeModal.type} for ${activeModal.booking.name} in Room ${activeModal.roomNumber}`);
+    setActiveModal(null);
+  };
 
   return (
     <div className="p-6 bg-[#f8fafc] min-h-screen font-sans text-slate-900">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-[32px] font-bold text-[#1e3a8a]">Dashboard</h1>
-        <Bell size={24} className="text-blue-400 cursor-pointer" />
+        
+        <FrontdeskNotification 
+          notifications={transformedNotifications} 
+          onMarkAsRead={(id) => console.log(`Notification ID ${id} marked as read.`)}
+          onMarkAllAsRead={() => console.log("All notifications marked as read.")}
+        />
       </div>
 
-      <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between mb-4">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1">
-            <button className="p-1 hover:bg-slate-50"><ChevronLeft size={16} /></button>
-            <span className="text-sm font-medium">Today</span>
-            <button className="p-1 hover:bg-slate-50"><ChevronRight size={16} /></button>
-          </div>
-          <span className="font-bold text-lg">{currentMonthYear}</span>
+      {/* Control Bar */}
+      <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex flex-col sm:flex-row gap-4 items-center justify-between mb-4">
+        <div className="flex items-center gap-4 w-full sm:w-auto">
+          {view !== "History" ? (
+            <>
+              <div className="flex items-center gap-1">
+                <button className="p-1 hover:bg-slate-50 rounded-md"><ChevronLeft size={16} /></button>
+                <span className="text-sm font-medium">Today</span>
+                <button className="p-1 hover:bg-slate-50 rounded-md"><ChevronRight size={16} /></button>
+              </div>
+              <span className="font-bold text-lg whitespace-nowrap">{currentMonthYear}</span>
+            </>
+          ) : (
+            <div className="flex items-center gap-2">
+              <History size={18} className="text-[#1e3a8a]" />
+              <span className="font-bold text-lg text-slate-700">Historical Logs</span>
+            </div>
+          )}
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="flex bg-slate-100 p-1 rounded-lg mr-2">
-            {(["Day", "Week", "Month"] as const).map((v) => (
-              <button 
-                key={v} 
-                onClick={() => setView(v)} 
-                className={`px-4 py-1 text-xs font-semibold rounded-md transition-all ${view === v ? "bg-white shadow-sm text-[#1e3a8a]" : "text-slate-500"}`}
-              >
-                {v}
-              </button>
-            ))}
-          </div>
-          <Button className="bg-[#3498db] text-white text-xs px-4 py-1.5 rounded-lg flex gap-2">
-            Add booking <Plus size={14} />
-          </Button>
+        <div className="flex bg-slate-100 p-1 rounded-lg self-end sm:self-auto">
+          {(["Day", "Week", "Month", "History"] as const).map((v) => (
+            <button 
+              key={v} 
+              onClick={() => setView(v)} 
+              className={`px-4 py-1 text-xs font-semibold rounded-md transition-all ${
+                view === v ? "bg-white shadow-sm text-[#1e3a8a]" : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              {v}
+            </button>
+          ))}
         </div>
       </div>
 
       {isLoading ? (
-        <div className="h-96 flex items-center justify-center"><Loader2 className="animate-spin text-blue-500" size={40} /></div>
+        <div className="h-96 flex items-center justify-center">
+          <Loader2 className="animate-spin text-blue-500" size={40} />
+        </div>
       ) : (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-          {view === "Month" ? (
-            <MonthGridView data={dashboardData} currentDayRef={currentDay} />
-          ) : (
-            <table className="w-full border-collapse table-fixed">
-              <thead>
-                <tr className="bg-[#2c3e50] text-white">
-                  <th className="w-16 p-2 text-[10px] font-bold border-r border-slate-600 text-left">Room #</th>
-                  <th className="w-16 p-2 text-[10px] font-bold border-r border-slate-600 text-left">Type</th>
-                  <th className="p-0">
-                    <div className={`grid ${view === "Day" ? "grid-cols-24" : "grid-cols-7"}`}>
-                      {view === "Day" ? HOURS.map((h, i) => (
-                        <div key={i} className="text-[9px] py-2 border-r border-slate-600 text-center opacity-70">{h}</div>
-                      )) : weekDays.map((wd, i) => (
-                        <div key={i} className="py-2 border-r border-slate-600 text-center">
-                          <span className="text-[9px] block opacity-60 uppercase">{wd.day.slice(0,3)}</span>
-                          <span className="text-[10px] font-bold">{wd.date}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(dashboardData).map(([floor, rooms]) => (
-                  <React.Fragment key={floor}>
-                    <tr className="bg-[#475569] text-white">
-                      <td colSpan={3} className="px-3 py-1.5 font-bold text-[11px] uppercase tracking-wider">{floor}</td>
-                    </tr>
-                    {rooms.map((room) => (
-                      <TimelineRow 
-                        key={room.room} 
-                        {...room} 
-                        view={view} 
-                        weekDays={weekDays} 
-                        currentDayRef={currentDay}
-                      />
-                    ))}
-                  </React.Fragment>
-                ))}
-              </tbody>
-            </table>
+          {view === "Day" && <FrontdeskDayView groupedData={groupedData} currentDayStr={currentDayStr} />}
+          
+          {view === "Week" && (
+            <FrontdeskWeeklyView 
+              groupedData={groupedData} 
+              weekDays={weekDays} 
+              onCheckInClick={(booking, roomNum) => setActiveModal({ type: "check-in", booking, roomNumber: roomNum })}
+              onCheckOutClick={(booking, roomNum) => setActiveModal({ type: "check-out", booking, roomNumber: roomNum })}
+              onApprovedBookingClick={(booking, roomNum) => setApprovedModal({ booking, roomNumber: roomNum, roomType: "N/A" })}
+            />
           )}
+          
+          {view === "Month" && (
+            <FrontdeskMonthlyView 
+              rooms={rooms} 
+              today={today} 
+              onCheckInClick={(booking, roomNum, roomType) => setActiveModal({ type: "check-in", booking, roomNumber: roomNum })}
+              onCheckOutClick={(booking, roomNum, roomType) => setActiveModal({ type: "check-out", booking, roomNumber: roomNum })}
+              onApprovedBookingClick={(booking, roomNum, roomType) => setApprovedModal({ booking, roomNumber: roomNum, roomType })}
+            />
+          )}
+
+          {/* 📜 Render clean extracted history layout view file */}
+          {view === "History" && <FrontdeskHistoryView rooms={rooms} />}
         </div>
       )}
 
-      <div className="mt-6 flex flex-wrap items-center gap-6 px-2">
-        <span className="text-xs font-bold text-slate-400">Legend:</span>
-        <LegendItem color="bg-[#1e3a8a]" label="Approved Bookings" />
-        <LegendItem color="bg-[#fee2e2]" label="Requested Bookings" border="border border-red-200" />
-        <LegendItem color="bg-[#f39c12]" label="Maintenance" />
-        <LegendItem color="bg-emerald-500" label="Check-in indicator" isCircle />
-        <LegendItem color="bg-red-500" label="Check-out indicator" isCircle />
-      </div>
-    </div>
-  );
-}
+      {/* Modals */}
+      <ConfirmationModal 
+        isOpen={activeModal !== null}
+        onClose={() => setActiveModal(null)}
+        onConfirm={handleConfirmAction}
+        guestName={activeModal?.booking.name || ""}
+        actionType={activeModal?.type || "check-in"}
+      />
 
-function TimelineRow({ room, type, bookings, view, weekDays, currentDayRef }: any) {
-  return (
-    <tr className="border-b border-slate-100 hover:bg-slate-50 transition-colors h-12">
-      <td className="p-2 border-r text-center font-bold text-[10px] text-slate-700">{room}</td>
-      <td className="p-2 border-r text-center text-slate-500 text-[10px]">{type}</td>
-      <td className="p-0 relative">
-        <div className={`grid h-full ${view === "Day" ? "grid-cols-24" : "grid-cols-7"}`}>
-          {Array.from({ length: view === "Day" ? 24 : 7 }).map((_, i) => (
-            <div key={i} className="border-r border-slate-50 h-full" />
-          ))}
-          
-          {bookings.map((b: any) => {
-            if (view === "Day" && b.date === currentDayRef) {
-              return (
-                <div
-                  key={b.id}
-                  style={{ gridColumn: `${b.start + 1} / span ${b.end - b.start}` }}
-                  className={`mx-1 self-center h-8 rounded relative flex items-center px-2 text-[9px] font-bold shadow-sm z-10 ${getBookingStyles(b.type)}`}
-                >
-                  {b.isCheckIn && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-emerald-500 rounded-l" />}
-                  {b.isCheckOut && <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-red-500 rounded-r" />}
-                  <span className="truncate">{b.name}</span>
-                </div>
-              );
-            }
-            if (view === "Week") {
-              const weekColumn = weekDays.findIndex((wd: any) => wd.date === b.date);
-              if (weekColumn === -1) return null;
-              return (
-                <div
-                  key={b.id}
-                  style={{ gridColumn: `${weekColumn + 1} / span 1` }}
-                  className={`mx-1 self-center h-8 rounded flex items-center px-2 text-[8px] font-bold truncate z-10 ${getBookingStyles(b.type)}`}
-                >
-                  {b.name}
-                </div>
-              );
-            }
-            return null;
-          })}
-        </div>
-      </td>
-    </tr>
-  );
-}
-
-function MonthGridView({ data, currentDayRef }: { data: Record<string, RoomData[]>, currentDayRef: number }) {
-  const allBookings = Object.values(data).flat().flatMap(room => room.bookings);
-  const now = new Date();
-  const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
-  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-
-  return (
-    <div className="bg-white overflow-hidden">
-      <div className="grid grid-cols-7 bg-[#2c3e50] text-white">
-        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(day => (
-          <div key={day} className="p-2 text-center font-bold text-[10px] border-r border-slate-600">{day}</div>
-        ))}
-      </div>
-      <div className="grid grid-cols-7 auto-rows-[120px]">
-        {Array.from({ length: 35 }, (_, i) => {
-          const dayNumber = i - firstDayOfMonth + 1; 
-          const isValidDay = dayNumber > 0 && dayNumber <= daysInMonth;
-          const dayBookings = isValidDay ? allBookings.filter(b => b.date === dayNumber) : [];
-          
-          return (
-            <div key={i} className={`border-r border-b p-1 flex flex-col ${!isValidDay ? "bg-slate-50" : "bg-white"}`}>
-              {isValidDay && (
-                <span className={`text-[10px] font-bold p-1 mb-1 ${dayNumber === currentDayRef ? "bg-[#1e3a8a] text-white w-5 h-5 flex items-center justify-center rounded-full" : "text-slate-400"}`}>
-                  {dayNumber}
-                </span>
-              )}
-              <div className="flex flex-col gap-1 overflow-y-auto">
-                {dayBookings.map(b => (
-                  <div key={b.id} className={`p-1 rounded text-[8px] font-bold truncate ${getBookingStyles(b.type)}`}>
-                    {b.name}
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function LegendItem({ color, label, border = "", isCircle = false }: any) {
-  return (
-    <div className="flex items-center gap-2">
-      <div className={`${isCircle ? "w-3 h-3 rounded-full" : "w-5 h-2.5 rounded-sm"} ${color} ${border}`}></div>
-      <span className="text-[10px] font-semibold text-slate-500">{label}</span>
+      <ApprovedStayModal 
+        isOpen={approvedModal !== null}
+        onClose={() => setApprovedModal(null)}
+        booking={approvedModal?.booking || null}
+        roomNumber={approvedModal?.roomNumber || "N/A"}
+        roomType={approvedModal?.roomType || "Unknown"}
+      />
     </div>
   );
 }

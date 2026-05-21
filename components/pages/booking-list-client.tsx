@@ -10,7 +10,9 @@ export default function BookingListClient() {
   const router = useRouter();
   const [bookings, setBookings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  
+  // CHANGED: track menu position instead of just the ID
+  const [menuConfig, setMenuConfig] = useState<{ id: string, x: number, y: number } | null>(null);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<{ id: string, name: string, status: string } | null>(null);
@@ -39,17 +41,38 @@ export default function BookingListClient() {
     fetchBookings();
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setOpenMenuId(null);
+        setMenuConfig(null);
       }
     };
+    // Close on scroll to prevent the fixed menu from "floating" away from the button
+    const handleScroll = () => setMenuConfig(null);
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    window.addEventListener("scroll", handleScroll, true);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("scroll", handleScroll, true);
+    };
   }, []);
+
+  // ADDED: Logic to calculate position
+  const toggleMenu = (e: React.MouseEvent, id: string) => {
+    if (menuConfig?.id === id) {
+      setMenuConfig(null);
+    } else {
+      const rect = e.currentTarget.getBoundingClientRect();
+      setMenuConfig({
+        id,
+        x: rect.left - 120, // Offset to the left so it aligns with button
+        y: rect.bottom + 8    // Small gap below button
+      });
+    }
+  };
 
   const handleActionClick = (id: string, name: string, newStatus: string) => {
     setPendingAction({ id, name, status: newStatus });
     setIsModalOpen(true);
-    setOpenMenuId(null);
+    setMenuConfig(null);
   };
 
   const confirmAction = async () => {
@@ -74,7 +97,6 @@ export default function BookingListClient() {
   return (
     <div className="w-full flex flex-col min-h-screen bg-transparent relative font-sans text-slate-900">
       
-      {/* HEADER SECTION - Title removed to prevent duplication with Breadcrumbs */}
       <header className="mb-8 w-full">
         <div className="flex items-center justify-between gap-4 w-full">
           <div className="flex items-center gap-4 flex-1">
@@ -104,8 +126,7 @@ export default function BookingListClient() {
         </div>
       </header>
 
-      {/* TABLE CONTAINER */}
-      <div className="w-full bg-white border border-gray-100 rounded-xl overflow-visible shadow-sm">
+      <div className="w-full bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto w-full">
             <table className="w-full text-left border-collapse">
             <thead>
@@ -146,30 +167,13 @@ export default function BookingListClient() {
                         <span className="text-[11px] font-bold uppercase tracking-tight">{booking.status}</span>
                     </div>
                     </td>
-                    <td className="px-4 py-4 text-center relative overflow-visible">
+                    <td className="px-4 py-4 text-center">
                     <button 
-                        onClick={() => setOpenMenuId(openMenuId === booking.dbId ? null : booking.dbId)}
+                        onClick={(e) => toggleMenu(e, booking.dbId)}
                         className="px-6 py-1.5 bg-[#3498db] text-white text-[13px] font-bold rounded-lg shadow-sm hover:bg-blue-600 transition-all"
                     >
                         Manage
                     </button>
-
-                    {openMenuId === booking.dbId && (
-                        <div 
-                        ref={menuRef} 
-                        className="absolute right-4 top-full mt-2 w-44 bg-white border border-gray-100 rounded-xl shadow-2xl z-50 py-2 animate-in fade-in zoom-in-95 duration-200"
-                        >
-                        <button onClick={() => handleActionClick(booking.dbId, booking.name, "Approved")} className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-[#2ecc71] hover:bg-gray-50 font-bold border-b border-gray-50/50 text-left">
-                            <Check size={16} /> Approve
-                        </button>
-                        <button onClick={() => handleActionClick(booking.dbId, booking.name, "Rejected")} className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-[#e74c3c] hover:bg-gray-50 font-bold border-b border-gray-50/50 text-left">
-                            <X size={16} /> Reject
-                        </button>
-                        <button onClick={() => router.push(`/home/booking-list/booking-details?id=${booking.dbId}`)} className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-[#3498db] hover:bg-gray-50 font-bold text-left">
-                            <Eye size={16} /> View Details
-                        </button>
-                        </div>
-                    )}
                     </td>
                 </tr>
                 ))}
@@ -177,6 +181,25 @@ export default function BookingListClient() {
             </table>
         </div>
       </div>
+
+      {/* CHANGED: Popover is now outside the table loop and uses fixed positioning */}
+      {menuConfig && (
+          <div 
+            ref={menuRef} 
+            style={{ top: `${menuConfig.y}px`, left: `${menuConfig.x}px` }}
+            className="fixed w-44 bg-white border border-gray-100 rounded-xl shadow-2xl z-[999] py-2 animate-in fade-in zoom-in-95 duration-200"
+          >
+            <button onClick={() => handleActionClick(menuConfig.id, bookings.find(b => b.dbId === menuConfig.id)?.name, "Approved")} className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-[#2ecc71] hover:bg-gray-50 font-bold border-b border-gray-50/50 text-left">
+                <Check size={16} /> Approve
+            </button>
+            <button onClick={() => handleActionClick(menuConfig.id, bookings.find(b => b.dbId === menuConfig.id)?.name, "Rejected")} className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-[#e74c3c] hover:bg-gray-50 font-bold border-b border-gray-50/50 text-left">
+                <X size={16} /> Reject
+            </button>
+            <button onClick={() => router.push(`/home/booking-list/booking-details?id=${menuConfig.id}`)} className="w-full flex items-center gap-3 px-4 py-2.5 text-xs text-[#3498db] hover:bg-gray-50 font-bold text-left">
+                <Eye size={16} /> View Details
+            </button>
+          </div>
+      )}
 
       {isModalOpen && pendingAction && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/20 backdrop-blur-sm">

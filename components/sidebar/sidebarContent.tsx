@@ -8,7 +8,6 @@ import DropdownNavItem from "@/components/sidebar/DropdownNavItem";
 export default function SidebarContent() {
   const pathname = usePathname();
   
-  // Detection logic for the three main account sections
   const isUserSection = pathname.startsWith("/home/user-dashboard");
   const isFrontdeskSection = pathname.startsWith("/home/frontdesk-dashboard");
 
@@ -19,7 +18,6 @@ export default function SidebarContent() {
     if (isUserSection) {
       return section.section === "User Menu" || section.section === "General";
     }
-    // Default fallback for Admin
     return section.section === "Menu" || section.section === "General";
   });
 
@@ -30,7 +28,6 @@ export default function SidebarContent() {
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4 px-2">
             <span className="group-hover:hidden block text-center">...</span>
             <span className="hidden group-hover:block">
-              {/* Display "Menu" for specific dashboard roles, otherwise use the section name */}
               {["User Menu", "Frontdesk Menu"].includes(section.section) 
                 ? "Menu" 
                 : section.section}
@@ -38,10 +35,15 @@ export default function SidebarContent() {
           </p>
           <div className="space-y-2">
             {section.items.map((item) => {
-              // Ensure Dashboard/Home links are only active on the exact path
-              const isActive = (item.href === "/home/user-dashboard" || item.href === "/home/frontdesk-dashboard")
+              // --- UPDATED LOGIC START ---
+              // Strict check for main dashboards so they don't stay active 
+              // when viewing sub-pages like guestlist
+              const isMainDashboard = item.href === "/home/user-dashboard" || item.href === "/home/frontdesk-dashboard";
+              
+              const isActive = isMainDashboard
                 ? pathname === item.href 
-                : pathname === item.href || pathname.startsWith(item.href + "/");
+                : pathname.startsWith(item.href!);
+              // --- UPDATED LOGIC END ---
 
               return item.children ? (
                 <DropdownNavItem key={item.label} item={item} />
