@@ -8,10 +8,21 @@ import DropdownNavItem from "@/components/sidebar/DropdownNavItem";
 export default function SidebarContent() {
   const pathname = usePathname();
   
+  // 1. Detect if we are in the BuildingAdmin section based on the URL path
+  // FIXED: Added check for any path containing "BuildingAdmin-" to keep the sidebar stable
+  const isBuildingAdminSection = pathname.includes("BuildingAdmin-") || 
+                                 pathname.startsWith("/home/people") || 
+                                 pathname.startsWith("/home/maintenance") || 
+                                 pathname.startsWith("/home/reports");
+
   const isUserSection = pathname.startsWith("/home/user-dashboard");
   const isFrontdeskSection = pathname.startsWith("/home/frontdesk-dashboard");
 
+  // 2. Filter routes based on the section
   const filteredRoutes = homeRoutes.filter((section) => {
+    if (isBuildingAdminSection) {
+      return section.section === "BuildingAdmin" || section.section === "General";
+    }
     if (isFrontdeskSection) {
       return section.section === "Frontdesk Menu" || section.section === "General";
     }
@@ -28,22 +39,21 @@ export default function SidebarContent() {
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-4 px-2">
             <span className="group-hover:hidden block text-center">...</span>
             <span className="hidden group-hover:block">
-              {["User Menu", "Frontdesk Menu"].includes(section.section) 
+              {/* 3. Force "Menu" label for the admin/dashboard sections */}
+              {["User Menu", "Frontdesk Menu", "BuildingAdmin", "Menu"].includes(section.section) 
                 ? "Menu" 
                 : section.section}
             </span>
           </p>
           <div className="space-y-2">
             {section.items.map((item) => {
-              // --- UPDATED LOGIC START ---
-              // Strict check for main dashboards so they don't stay active 
-              // when viewing sub-pages like guestlist
-              const isMainDashboard = item.href === "/home/user-dashboard" || item.href === "/home/frontdesk-dashboard";
+              const isMainDashboard = item.href === "/home/user-dashboard" || 
+                                      item.href === "/home/frontdesk-dashboard" || 
+                                      item.href === "/home/BuildingAdmin-Dashboard";
               
               const isActive = isMainDashboard
                 ? pathname === item.href 
                 : pathname.startsWith(item.href!);
-              // --- UPDATED LOGIC END ---
 
               return item.children ? (
                 <DropdownNavItem key={item.label} item={item} />

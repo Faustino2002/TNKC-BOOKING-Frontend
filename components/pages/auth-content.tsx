@@ -59,6 +59,15 @@ export function AuthContent() {
       localStorage.setItem("userRole", "Guest");
       localStorage.setItem("userEmail", "randolph.f@gmail.com");
       router.push("/home/user-dashboard"); 
+
+  
+    } else if (username === "BuildingAdmin" && password === "Building123") {
+      setLoginError(false);
+      setFailedAttempts(0);
+      localStorage.setItem("userFullName", "Leeroy Genkins");
+      localStorage.setItem("userRole", "Building Admin");
+      localStorage.setItem("userEmail", "Leeroy.Genkins@gmail.com");
+      router.push("/home/BuildingAdmin-Dashboard"); 
       
     } else {
       setLoginError(true);

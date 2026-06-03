@@ -5,10 +5,23 @@ import {
   BookOpen, 
   Settings, 
   LifeBuoy,
-  ClipboardList 
+  ClipboardList,
+  Bed,
+  Home,
+  FileText
 } from "lucide-react";
 
 export const homeRoutes = [
+  {
+    section: "BuildingAdmin", 
+    items: [
+      { label: "People Directory", href: "/home/BuildingAdmin-Dashboard", icon: Users },
+      { label: "Accommodation", href: "/home/BuildingAdmin-Accommodation", icon: Bed },
+      { label: "Housekeeping", href: "/home/BuildingAdmin-Housekeeping", icon: Home },
+      { label: "Maintenance", href: "/home/BuildingAdmin-Maintenance", icon: ClipboardList },
+      { label: "Reports", href: "/home/BuildingAdmin-Reports", icon: FileText },
+    ]
+  },
   {
     section: "Menu", // Admin Section
     items: [
@@ -32,7 +45,6 @@ export const homeRoutes = [
       { label: "Dashboard", href: "/home/frontdesk-dashboard", icon: LayoutDashboard },
       { 
         label: "Guestlist", 
-        // CHANGED: Updated to match your new directory structure
         href: "/home/frontdesk-dashboard/frontdesk-guestlist", 
         icon: Users 
       },
