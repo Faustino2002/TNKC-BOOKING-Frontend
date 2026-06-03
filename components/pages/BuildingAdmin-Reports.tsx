@@ -27,13 +27,24 @@ interface Transaction {
   grandTotal: number;
 }
 
+interface MealCounts {
+  breakfast: number;
+  lunch: number;
+  dinner: number;
+  grandTotal: number;
+}
+
 export default function BuildingAdminReports() {
-  // --- FIXED: TRACK THE SELECTED OBJECT INSTEAD OF A PLAIN STRING VIEW STATE ---
+  // --- TRACK THE SELECTED OBJECT INSTEAD OF A PLAIN STRING VIEW STATE ---
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
-  const [isMealSummaryOpen, setIsMealSummaryOpen] = useState(true);
+  // --- CHANGED: THIS SCRIPT STATE NOW DROPS DOWN THE TIMELINE MENU INSTEAD OF COLLAPSING CARDS ---
+  const [isMealDropdownOpen, setIsMealDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [dateRange, setDateRange] = useState("");
+  
+  // --- NEW STATE: TRACKS CURRENT SELECTION FROM DROPDOWN ---
+  const [mealTimeline, setMealTimeline] = useState<"Today" | "Yesterday">("Today");
   
   // --- CALENDAR STATES ---
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -42,12 +53,16 @@ export default function BuildingAdminReports() {
   const [endDate, setEndDate] = useState<Date | null>(null);
   
   const calendarRef = useRef<HTMLDivElement>(null);
+  const mealDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close calendar if user clicks outside of it
+  // Close calendar or meal dropdown if user clicks outside of them
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
         setIsCalendarOpen(false);
+      }
+      if (mealDropdownRef.current && !mealDropdownRef.current.contains(event.target as Node)) {
+        setIsMealDropdownOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -61,6 +76,14 @@ export default function BuildingAdminReports() {
     { number: 3, name: "Marcus A. Chen", initials: "MC", room: "403", roomCharge: 4000.00, meal: "Breakfast, Lunch, Dinner", mealCharge: 3200.00, periodCovered: "Mar 28 2026", grandTotal: 7200.00 },
     { number: 4, name: "Elena R. Petrov", initials: "EP", room: "205", roomCharge: 1000.00, meal: "Breakfast, Lunch, Dinner", mealCharge: 2000.00, periodCovered: "Mar 14 2026", grandTotal: 3000.00 },
   ]);
+
+  // --- MOCK DICTIONARY TO CHANGE CARD TRACK NUMBERS ---
+  const dynamicMealStats: Record<"Today" | "Yesterday", MealCounts> = {
+    Today: { breakfast: 12, lunch: 12, dinner: 80, grandTotal: 80 },
+    Yesterday: { breakfast: 15, lunch: 9, dinner: 74, grandTotal: 98 }
+  };
+
+  const currentMealData = dynamicMealStats[mealTimeline];
 
   // --- CONDITIONAL VIEW RETURN WITH PROP INJECTION ---
   if (selectedTransaction !== null) {
@@ -136,7 +159,6 @@ export default function BuildingAdminReports() {
     }
   };
 
-  // Helper arrays for calculating calendar cells
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -187,72 +209,108 @@ export default function BuildingAdminReports() {
       {/* View Title */}
       <h1 className="text-4xl font-extrabold text-[#17466C] tracking-tight mb-6">Reports</h1>
 
-      {/* --- COLLAPSIBLE MEAL SUMMARY CARDS PANEL --- */}
+      {/* --- MEAL SUMMARY CONTROLLER AREA --- */}
       <div className="mb-6 bg-transparent">
-        <button
-          type="button"
-          onClick={() => setIsMealSummaryOpen(!isMealSummaryOpen)}
-          className="flex items-center gap-2 bg-white border border-slate-200 px-4 py-2 rounded-xl text-sm font-bold text-slate-800 shadow-sm hover:bg-slate-50 transition-colors"
-        >
-          <span>Meal Summary</span>
-          {isMealSummaryOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        </button>
+        {/* Dropdown Relative Position Target Anchor */}
+        <div className="relative inline-block text-left" ref={mealDropdownRef}>
+          <button
+            type="button"
+            onClick={() => setIsMealDropdownOpen(!isMealDropdownOpen)}
+            className="flex items-center gap-2 bg-white border border-slate-200 px-4 py-2 rounded-xl text-sm font-bold text-slate-800 shadow-sm hover:bg-slate-50 transition-colors"
+          >
+            <span>Meal Summary: <span className="text-[#2B92E4] font-extrabold">{mealTimeline}</span></span>
+            {isMealDropdownOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </button>
 
-        {isMealSummaryOpen && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-4">
-            {/* Breakfast Card */}
-            <div className="bg-gradient-to-b from-[#2B92E4] to-[#1E77C2] rounded-2xl p-5 text-white shadow-md relative overflow-hidden">
-              <div className="flex justify-between items-start mb-2">
-                <span className="text-sm font-bold opacity-90">Breakfast</span>
-                <span className="opacity-40">🍳</span>
-              </div>
-              <div className="text-4xl font-black mb-3">12</div>
-              <div className="flex items-center gap-1.5 text-[11px] bg-white/10 px-2 py-0.5 rounded-md w-fit">
-                <span className="font-bold border border-white/30 px-1 rounded text-[9px]">13⌃</span>
-                <span className="opacity-80">Increased from last month</span>
-              </div>
+          {/* --- ACTIVE POPUP TIMELINE OPTIONS WINDOW --- */}
+          {isMealDropdownOpen && (
+            <div className="absolute left-0 mt-1 w-40 origin-top-left bg-white border border-slate-100 rounded-xl shadow-lg py-1.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+              <button
+                type="button"
+                onClick={() => {
+                  setMealTimeline("Today");
+                  setIsMealDropdownOpen(false);
+                }}
+                className={`w-full text-left px-4 py-2 text-xs font-bold transition-colors ${
+                  mealTimeline === "Today" 
+                    ? "bg-[#E2F0FD] text-[#1E77C2]" 
+                    : "text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                Today
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMealTimeline("Yesterday");
+                  setIsMealDropdownOpen(false);
+                }}
+                className={`w-full text-left px-4 py-2 text-xs font-bold transition-colors ${
+                  mealTimeline === "Yesterday" 
+                    ? "bg-[#E2F0FD] text-[#1E77C2]" 
+                    : "text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                Yesterday
+              </button>
             </div>
+          )}
+        </div>
 
-            {/* Lunch Card */}
-            <div className="bg-gradient-to-b from-[#2B92E4] to-[#1E77C2] rounded-2xl p-5 text-white shadow-md relative overflow-hidden">
-              <div className="flex justify-between items-start mb-2">
-                <span className="text-sm font-bold opacity-90">Lunch</span>
-                <span className="opacity-40">🍗</span>
-              </div>
-              <div className="text-4xl font-black mb-3">12</div>
-              <div className="flex items-center gap-1.5 text-[11px] bg-white/10 px-2 py-0.5 rounded-md w-fit">
-                <span className="font-bold border border-white/30 px-1 rounded text-[9px]">13⌃</span>
-                <span className="opacity-80">Increased from last month</span>
-              </div>
+        {/* --- STAT CARDS REMAIN PERMANENTLY VISIBLE DOWN HERE --- */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-4">
+          {/* Breakfast Card */}
+          <div className="bg-gradient-to-b from-[#2B92E4] to-[#1E77C2] rounded-2xl p-5 text-white shadow-md relative overflow-hidden">
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-sm font-bold opacity-90">Breakfast</span>
+              <span className="opacity-40">🍳</span>
             </div>
-
-            {/* Dinner Card */}
-            <div className="bg-gradient-to-b from-[#1B5080] to-[#143E64] rounded-2xl p-5 text-white shadow-md relative overflow-hidden">
-              <div className="flex justify-between items-start mb-2">
-                <span className="text-sm font-bold opacity-90">Dinner</span>
-                <span className="opacity-40">🍲</span>
-              </div>
-              <div className="text-4xl font-black mb-3">80</div>
-              <div className="flex items-center gap-1.5 text-[11px] bg-white/10 px-2 py-0.5 rounded-md w-fit">
-                <span className="font-bold border border-white/30 px-1 rounded text-[9px]">13⌃</span>
-                <span className="opacity-80">Increased from last month</span>
-              </div>
-            </div>
-
-            {/* Grand Total Card */}
-            <div className="bg-gradient-to-b from-[#1B5080] to-[#143E64] rounded-2xl p-5 text-white shadow-md relative overflow-hidden">
-              <div className="flex justify-between items-start mb-2">
-                <span className="text-sm font-bold opacity-90">Grand Total</span>
-                <span className="opacity-40">₱</span>
-              </div>
-              <div className="text-4xl font-black mb-3">80</div>
-              <div className="flex items-center gap-1.5 text-[11px] bg-white/10 px-2 py-0.5 rounded-md w-fit">
-                <span className="font-bold border border-white/30 px-1 rounded text-[9px]">13⌃</span>
-                <span className="opacity-80">Increased from last month</span>
-              </div>
+            <div className="text-4xl font-black mb-3">{currentMealData.breakfast}</div>
+            <div className="flex items-center gap-1.5 text-[11px] bg-white/10 px-2 py-0.5 rounded-md w-fit">
+              <span className="font-bold border border-white/30 px-1 rounded text-[9px]">13⌃</span>
+              <span className="opacity-80">Increased from last month</span>
             </div>
           </div>
-        )}
+
+          {/* Lunch Card */}
+          <div className="bg-gradient-to-b from-[#2B92E4] to-[#1E77C2] rounded-2xl p-5 text-white shadow-md relative overflow-hidden">
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-sm font-bold opacity-90">Lunch</span>
+              <span className="opacity-40">🍗</span>
+            </div>
+            <div className="text-4xl font-black mb-3">{currentMealData.lunch}</div>
+            <div className="flex items-center gap-1.5 text-[11px] bg-white/10 px-2 py-0.5 rounded-md w-fit">
+              <span className="font-bold border border-white/30 px-1 rounded text-[9px]">13⌃</span>
+              <span className="opacity-80">Increased from last month</span>
+            </div>
+          </div>
+
+          {/* Dinner Card */}
+          <div className="bg-gradient-to-b from-[#1B5080] to-[#143E64] rounded-2xl p-5 text-white shadow-md relative overflow-hidden">
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-sm font-bold opacity-90">Dinner</span>
+              <span className="opacity-40">🍲</span>
+            </div>
+            <div className="text-4xl font-black mb-3">{currentMealData.dinner}</div>
+            <div className="flex items-center gap-1.5 text-[11px] bg-white/10 px-2 py-0.5 rounded-md w-fit">
+              <span className="font-bold border border-white/30 px-1 rounded text-[9px]">13⌃</span>
+              <span className="opacity-80">Increased from last month</span>
+            </div>
+          </div>
+
+          {/* Grand Total Card */}
+          <div className="bg-gradient-to-b from-[#1B5080] to-[#143E64] rounded-2xl p-5 text-white shadow-md relative overflow-hidden">
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-sm font-bold opacity-90">Grand Total</span>
+              <span className="opacity-40">₱</span>
+            </div>
+            <div className="text-4xl font-black mb-3">{currentMealData.grandTotal}</div>
+            <div className="flex items-center gap-1.5 text-[11px] bg-white/10 px-2 py-0.5 rounded-md w-fit">
+              <span className="font-bold border border-white/30 px-1 rounded text-[9px]">13⌃</span>
+              <span className="opacity-80">Increased from last month</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* --- GUEST SERVICE TRANSACTION TABLE FRAMEWORK --- */}
@@ -398,7 +456,7 @@ export default function BuildingAdminReports() {
                   <td className="px-4 py-4 text-right">
                     <button
                       type="button"
-                      onClick={() => setSelectedTransaction(tx)} // FIXED: Updates object tracking state instead of plain string view state
+                      onClick={() => setSelectedTransaction(tx)}
                       className="bg-[#2B92E4] hover:bg-[#207fcc] text-white font-bold text-xs px-3 py-1.5 rounded-lg transition-colors shadow-sm"
                     >
                       More details
